@@ -170,6 +170,10 @@ body {
     background: rgba(0, 136, 204, 0.9);
 }
 
+.social-icon.gitea:hover {
+    background: rgba(96, 153, 38, 0.9);
+}
+
 .social-icon.fh:hover {
     background: rgba(103, 126, 234, 0.9);
 }
