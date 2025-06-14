@@ -124,6 +124,14 @@ body {
     z-index: 10;
 }
 
+/*.pt-icon {
+    position: fixed;
+    top: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+}*/
+
 .social-icon {
     width: 60px;
     height: 60px;
@@ -177,6 +185,10 @@ body {
 .social-icon.fh:hover {
     background: rgba(103, 126, 234, 0.9);
 }
+
+/*.social-icon.pt:hover {
+    background: rgba(55, 55, 55, 0.9);
+}*/
 
 .social-icon svg {
     width: 28px;
@@ -267,9 +279,13 @@ body {
     }
 
     .fh-icon {
-        bottom: 15px;
+        bottom: 20px;
         left: 15px;
     }
+
+    /*.pt-icon {
+        top: 15px;
+    }*/
 
     .social-icon {
         width: 50px;
@@ -298,7 +314,7 @@ body {
     }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 535px) {
     .social-icons {
         position: fixed;
         bottom: 20px;
@@ -314,5 +330,18 @@ body {
         right: 50%;
         transform: translateX(50%);
         top: auto;
+    }
+
+    /*.pt-icon {
+        top: 15px;
+        right: 15px;
+        left: auto;
+        transform: none;
+    }*/
+
+    .fh-icon {
+        position: fixed;
+        top: 15px;
+        left: 15px;
     }
 }
