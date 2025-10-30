@@ -127,7 +127,7 @@ const projects = [
       { name: 'Vue', icon: 'bxl:vuejs' }
     ],
     year: '2025',
-    image: '/favicon.ico',
+    image: '/avatar.png',
     link: 'https://lukiuwu.xyz'
   }
 ]
