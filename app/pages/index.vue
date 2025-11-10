@@ -3,7 +3,7 @@
     <section class="hero-section">
       <a class="title">TheNightlyGod</a>
       <div class="avatar-container">
-        <img src="/3d.png" alt="Avatar" class="avatar" />
+        <img src="/3dh.png" alt="Avatar" class="avatar" />
       </div>
     </section>
 
@@ -312,7 +312,7 @@ function getShineStyle(i: number, arr: TiltCard[]) {
 
 .skill-description {
   margin: 0 0 12px 0;
-  color: rgba(0,0,0,0.7);
+  color: rgba(255,255,255,0.75);
   font-family: Comfortaa, serif;
 }
 
@@ -324,8 +324,8 @@ function getShineStyle(i: number, arr: TiltCard[]) {
 
 .skill-tag {
   font-size: 13px;
-  color: #000;
-  background: rgba(0, 0, 0, 0.08);
+  color: #fff;
+  background: rgba(255, 255, 255, 0.08);
   padding: 6px 10px;
   border-radius: 8px;
   font-family: Comfortaa, serif;
@@ -401,10 +401,10 @@ function getShineStyle(i: number, arr: TiltCard[]) {
   overflow: hidden;
   border-radius: 16px;
   padding: 28px;
-  background: rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.06);
   backdrop-filter: blur(12px);
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  color: #000;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #fff;
   height: 280px;
   display: flex;
   flex-direction: column;
@@ -450,7 +450,7 @@ function getShineStyle(i: number, arr: TiltCard[]) {
 .project-icon {
   width: 48px;
   height: 48px;
-  background: rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.08);
   border-radius: 12px;
   display: flex;
   align-items: center;
@@ -474,19 +474,19 @@ function getShineStyle(i: number, arr: TiltCard[]) {
   font-size: 20px;
   font-weight: 600;
   margin: 0 0 4px 0;
-  color: #000;
+  color: #fff;
   line-height: 1.2;
 }
 
 .project-domain {
   font-size: 14px;
-  color: rgba(0, 0, 0, 0.6);
+  color: rgba(255, 255, 255, 0.65);
   font-family: Comfortaa, serif;
 }
 
 .project-year {
-  background: rgba(0, 0, 0, 0.1);
-  color: #000;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
   font-size: 12px;
   padding: 4px 10px;
   border-radius: 8px;
@@ -499,7 +499,7 @@ function getShineStyle(i: number, arr: TiltCard[]) {
 .project-description {
   font-size: 15px;
   line-height: 1.6;
-  color: rgba(0, 0, 0, 0.75);
+  color: rgba(255, 255, 255, 0.8);
   margin: 0 0 16px 0;
   font-family: Comfortaa, serif;
 }
@@ -520,8 +520,8 @@ function getShineStyle(i: number, arr: TiltCard[]) {
 
 .language-tag {
   font-size: 13px;
-  color: #000;
-  background: rgba(0, 0, 0, 0.08);
+  color: #fff;
+  background: rgba(255, 255, 255, 0.08);
   padding: 4px 10px;
   border-radius: 8px;
   font-family: Comfortaa, serif;
@@ -539,8 +539,8 @@ function getShineStyle(i: number, arr: TiltCard[]) {
 
 .view-button {
   font-size: 14px;
-  color: #000;
-  background: rgba(0, 0, 0, 0.08);
+  color: #fff;
+  background: rgba(255, 255, 255, 0.08);
   padding: 10px 20px;
   border-radius: 12px;
   text-decoration: none;
@@ -555,7 +555,7 @@ function getShineStyle(i: number, arr: TiltCard[]) {
 }
 
 .view-button:hover {
-  background: rgba(0, 0, 0, 0.15);
+  background: rgba(255, 255, 255, 0.16);
   transform: translateX(4px);
 }
 
@@ -584,10 +584,10 @@ function getShineStyle(i: number, arr: TiltCard[]) {
   overflow: hidden;
   border-radius: 16px;
   padding: 28px;
-  background: rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.06);
   backdrop-filter: blur(12px);
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  color: #000;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #fff;
   height: 260px;
   display: flex;
   flex-direction: column;
