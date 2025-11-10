@@ -128,7 +128,7 @@ const projects = [
     ],
     year: '2025',
     image: '/avatar.png',
-    link: 'https://lukiuwu.xyz'
+    link: 'https://github.com/TheNightlyGod/lukiuwuxyz'
   }
 ]
 
