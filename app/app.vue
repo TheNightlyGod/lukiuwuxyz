@@ -4,9 +4,6 @@
       <a href="/" class="logo" aria-label="Home">
         <img src="/avatar.png" alt="Logo" />
       </a>
-      <div class="notification">
-        Press F to show your respect for <a href="https://status.lukiuwu.xyz/view/events/MAINTENANCE-11" target="_blank" rel="noopener noreferrer">FREAKHOSTING</a>
-      </div>
       <div class="social-buttons">
         <a href="https://github.com/TheNightlyGod" target="_blank" class="social-btn" aria-label="GitHub">
           <svg width="24" height="24" viewBox="0 0 24 24">
@@ -68,10 +65,6 @@
             </defs>
           </svg>
         </a>
-
-        <a href="https://lukiuwu.xyz/fh" target="_blank" class="social-btn" aria-label="FREAKHOSTING">
-          <img src="/FREAK-AVTR-01.jpg" alt="FreakHosting">
-        </a>
       </div>
     </header>
 
@@ -123,7 +116,7 @@ body::-webkit-scrollbar {
 
 <style scoped>
 .app {
-  background-color: #c5c5c5;
+  background: top url("/back.png");
   min-height: 100vh;
   width: 100%;
 }
@@ -229,52 +222,6 @@ body::-webkit-scrollbar {
 .footer-line {
   font-family: Comfortaa, serif;
   font-size: 14px;
-}
-
-.notification {
-  position: fixed;
-  top: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
-  color: #1f232b;
-  padding: 12px 20px;
-  border-radius: 15px;
-  box-shadow: 0 8px 20px rgba(255, 215, 0, 0.4);
-  z-index: 1000;
-  font-weight: 600;
-  font-size: 0.95rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  animation: slideDown 0.5s ease-out, pulse 2s ease-in-out infinite;
-  backdrop-filter: blur(10px);
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  max-width: 90%;
-  text-align: center;
-  line-height: 1.4;
-  flex-wrap: wrap;
-  pointer-events: auto;
-}
-
-.notification a {
-  color: #1f232b;
-  text-decoration: none;
-  font-weight: 700;
-  background: rgba(255, 255, 255, 0.3);
-  padding: 2px 8px;
-  border-radius: 6px;
-  transition: all 0.3s ease;
-  white-space: nowrap;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  margin: 0 2px;
-}
-
-.notification a:hover {
-  background: rgba(255, 255, 255, 0.5);
-  color: #000;
-  text-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
 }
 
 @keyframes slideDown {
