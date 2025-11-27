@@ -3,7 +3,7 @@
     <section class="hero-section">
       <a class="title">TheNightlyGod</a>
       <div class="avatar-container">
-        <img src="/3d.png" alt="Avatar" class="avatar" />
+        <img src="/3d.png?ver=mc" alt="Avatar" class="avatar" />
       </div>
     </section>
 
