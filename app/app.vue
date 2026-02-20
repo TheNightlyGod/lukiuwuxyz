@@ -1,6 +1,6 @@
 <template>
   <div class="app">
-    <header class="header">
+    <header v-if="$route.path !== '/ref'" class="header">
       <a href="/" class="logo" aria-label="Home">
         <img src="/avatar.png" alt="Logo" />
       </a>
@@ -72,7 +72,7 @@
       <NuxtPage />
     </main>
 
-    <footer class="footer">
+    <footer v-if="$route.path !== '/ref'" class="footer">
       <div class="footer-content">
         <p class="footer-line">Made with love :3 using Nuxt and Vue.</p>
         <p class="footer-line">Copyright © 2025 lukiuwu. All rights reserved. No copying or editing allowed.</p>
