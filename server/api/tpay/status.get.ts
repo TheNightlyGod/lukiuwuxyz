@@ -1,4 +1,4 @@
-// server/api/sbp/status.get.ts
+// server/api/tpay/status.get.ts
 
 export default defineEventHandler(async (event) => {
     const query = getQuery(event)
@@ -13,7 +13,7 @@ export default defineEventHandler(async (event) => {
 
     try {
         const response = await $fetch<any>(
-            `https://api.cloudtips.ru/api/payment/sbp/status?transactionId=${transactionId}`,
+            `https://api.cloudtips.ru/api/payment/tpay/status?transactionId=${transactionId}`,
             {
                 method: 'GET',
                 headers: {

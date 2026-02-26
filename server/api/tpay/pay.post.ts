@@ -1,4 +1,4 @@
-// server/api/sbp/pay.post.ts
+// server/api/tpay/pay.post.ts
 
 export default defineEventHandler(async (event) => {
     const body = await readBody(event)
@@ -35,7 +35,7 @@ export default defineEventHandler(async (event) => {
     }
 
     try {
-        const response = await $fetch('https://api.cloudtips.ru/api/payment/sbp', {
+        const response = await $fetch('https://api.cloudtips.ru/api/payment/tpay', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: payload,

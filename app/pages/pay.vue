@@ -8,6 +8,7 @@ type Method = 'cloudtips' | 'cryptobot'
 const step = ref<Step>('region')
 const region = ref<Region>(null)
 const method = computed<Method>(() => region.value === 'ru' ? 'cloudtips' : 'cryptobot')
+const activeMethod = ref<'tpay' | 'sbp' | null>(null)
 
 const name = ref('')
 const comment = ref('')
@@ -16,13 +17,64 @@ const amount = ref('')
 const qrImageBase64 = ref('')
 const qrFallbackUrl = ref('')
 const universalLinkUrl = ref('')
+const deviceInfo = ref<{
+  browser: string
+  os: string
+  type: number
+  webview: boolean
+}>({
+  browser: 'Unknown',
+  os: 'Unknown',
+  type: 3,
+  webview: false
+})
 
 const transactionId = ref<number | string | null>(null)
 const loading = ref(false)
 const error = ref('')
 
+const MAX_POLL_ATTEMPTS = 60
+let pollAttempts = 0
 const CRYPTO_POLL_INTERVAL_MS = 4_000
 let pollTimer: ReturnType<typeof setInterval> | null = null
+
+onMounted(() => {
+  detectDevice()
+})
+
+function detectDevice() {
+  const ua = navigator.userAgent.toLowerCase()
+  const isMobile = /mobile|android|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(ua)
+
+  deviceInfo.value.type = isMobile ? 2 : 3
+  deviceInfo.value.webview = /; wv\) |webview/i.test(ua)
+
+  if (navigator.userAgentData) {
+    const hints = navigator.userAgentData
+    deviceInfo.value.os = hints.platform || 'Unknown'
+    deviceInfo.value.type = hints.mobile ? 2 : 3
+
+    const brands = hints.brands || []
+    const chrome = brands.find(b => b.brand === 'Google Chrome' || b.brand === 'Chromium')
+    const edge   = brands.find(b => b.brand === 'Microsoft Edge' || b.brand.includes('Edge'))
+
+    if (edge)   deviceInfo.value.browser = 'Edge'
+    else if (chrome) deviceInfo.value.browser = 'Chrome'
+    else if (brands.length) deviceInfo.value.browser = brands[0].brand || 'Unknown'
+  } else {
+    if (/edg\//.test(ua))        deviceInfo.value.browser = 'Edge'
+    else if (/chrome\//.test(ua))  deviceInfo.value.browser = 'Chrome'
+    else if (/firefox\//.test(ua)) deviceInfo.value.browser = 'Firefox'
+    else if (/safari\//.test(ua))  deviceInfo.value.browser = 'Safari'
+    else if (/opr\//.test(ua))     deviceInfo.value.browser = 'Opera'
+
+    if (/windows/.test(ua))     deviceInfo.value.os = 'Windows'
+    else if (/mac os x|macintosh/.test(ua)) deviceInfo.value.os = 'macOS'
+    else if (/android/.test(ua)) deviceInfo.value.os = 'Android'
+    else if (/iphone|ipad|ipod/.test(ua)) deviceInfo.value.os = 'iOS'
+    else if (/linux/.test(ua))  deviceInfo.value.os = 'Linux'
+  }
+}
 
 function selectRegion(r: Region) {
   region.value = r
@@ -63,17 +115,18 @@ function stopPolling() {
   }
 }
 
-async function createSbpPayment() {
+async function createBankPayment() {
   const amountVal = parseFloat(amount.value)
   if (!amountVal || amountVal <= 0) throw new Error('Введите корректную сумму')
-  if (amountVal < 49) throw new Error('Минимальная сумма для СБП — 49 ₽')
+  if (amountVal < 49) throw new Error('Минимальная сумма для доната — 49 ₽')
 
-  const res = await $fetch<any>('/api/sbp/pay', {
+  const res = await $fetch<any>(`/api/${activeMethod.value}/pay`, {
     method: 'POST',
     body: {
       amount: amountVal,
       name: name.value || '',
       comment: comment.value || '',
+      device: deviceInfo.value
     },
   })
 
@@ -84,12 +137,9 @@ async function createSbpPayment() {
   const data = res.data
   transactionId.value = data.transactionId
 
-  const rawQr: string = data.qrImage || data.qrUrl || data.qr || data.image || ''
+  const rawQr: string = data.qrImage || ''
 
-  if (rawQr.startsWith('http')) {
-    qrFallbackUrl.value = rawQr
-    qrImageBase64.value = ''
-  } else if (rawQr) {
+  if (rawQr) {
     qrImageBase64.value = rawQr
     qrFallbackUrl.value = ''
   } else {
@@ -101,24 +151,6 @@ async function createSbpPayment() {
 
   if (!qrImageBase64.value && !qrFallbackUrl.value && universalLinkUrl.value) {
     qrFallbackUrl.value = `https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=${encodeURIComponent(universalLinkUrl.value)}`
-  }
-}
-
-async function startSbpPolling() {
-  stopPolling()
-  try {
-    const res = await $fetch<any>(`/api/sbp/status?transactionId=${transactionId.value}`)
-    const status = res?.data?.status
-
-    if (status === 2 || status === 'Success' || status === 'success') {
-      step.value = 'success'
-    } else if (status === 3 || status === 'Failed' || status === 'failed') {
-      step.value = 'failed'
-    } else {
-      startSbpPolling()
-    }
-  } catch {
-    step.value = 'failed'
   }
 }
 
@@ -146,20 +178,53 @@ async function createCryptobotInvoice() {
       ? `https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=${encodeURIComponent(universalLinkUrl.value)}`
       : ''
 
-  startCryptobotPolling(String(invoice.invoice_id))
+  startPolling()
 }
 
-function startCryptobotPolling(invoiceId: string) {
-  stopPolling()
-  pollTimer = setInterval(async () => {
-    try {
-      const res = await $fetch<any>(`/api/crypto/status?invoiceId=${invoiceId}`)
-      if (res?.ok && res.result?.items?.[0]?.status === 'paid') {
-        stopPolling()
+async function pollStatus() {
+  if (pollAttempts++ > MAX_POLL_ATTEMPTS) {
+    stopPolling()
+    error.value = 'Время ожидания оплаты истекло'
+    step.value = 'failed'
+    return
+  }
+
+  try {
+    let res
+    if (method.value === 'cloudtips') {
+      res = await $fetch<any>(`/api/sbp/status?transactionId=${transactionId.value}`)
+      const status = res?.data?.status
+      if (status === 2 || status?.toLowerCase() === 'success') {
         step.value = 'success'
+        stopPolling()
+        return
       }
-    } catch {}
-  }, CRYPTO_POLL_INTERVAL_MS)
+      if (status === 3 || status?.toLowerCase() === 'failed') {
+        step.value = 'failed'
+        stopPolling()
+        return
+      }
+    } else {
+      res = await $fetch<any>(`/api/crypto/status?invoiceId=${transactionId.value}`)
+      if (res?.ok && res.result?.items?.[0]?.status === 'paid') {
+        step.value = 'success'
+        stopPolling()
+        return
+      }
+    }
+
+    pollTimer = setTimeout(pollStatus, CRYPTO_POLL_INTERVAL_MS)
+  } catch (err) {
+    console.error('Polling error:', err)
+    step.value = 'failed'
+    stopPolling()
+  }
+}
+
+function startPolling() {
+  stopPolling()
+  pollAttempts = 0
+  pollTimer = setTimeout(pollStatus, 1000)
 }
 
 async function pay() {
@@ -171,9 +236,9 @@ async function pay() {
   loading.value = true
   try {
     if (method.value === 'cloudtips') {
-      await createSbpPayment()
+      await createBankPayment()
       step.value = 'qr'
-      startSbpPolling()
+      startPolling()
     } else {
       await createCryptobotInvoice()
       step.value = 'qr'
@@ -183,6 +248,11 @@ async function pay() {
   } finally {
     loading.value = false
   }
+}
+
+async function payWith(m: 'tpay' | 'sbp') {
+  activeMethod.value = m
+  await pay()
 }
 
 const qrSrc = computed(() => {
@@ -265,9 +335,25 @@ const qrSrc = computed(() => {
 
           <p v-if="error" class="error-msg">{{ error }}</p>
 
-          <button class="pay-btn" :disabled="loading" @click="pay">
+          <div v-if="method === 'cloudtips'" class="sbp-buttons">
+            <button class="pay-btn tpay-btn" :disabled="loading" @click="payWith('tpay')">
+              <span v-if="loading && activeMethod === 'tpay'" class="spinner" />
+              <template v-else>
+                <img :src="'/tpay.svg'" alt="TPay" style="height:30px;" />
+              </template>
+            </button>
+            <button class="pay-btn sbp-btn" :disabled="loading" @click="payWith('sbp')">
+              <span v-if="loading && activeMethod === 'sbp'" class="spinner" />
+              <template v-else>
+                <img :src="'/sbp.svg'" alt="СБП" style="height:30px;" />
+              </template>
+            </button>
+          </div>
+          <button v-if="method === 'cryptobot'" class="pay-btn crypto" :disabled="loading" @click="pay">
             <span v-if="loading" class="spinner" />
-            <span v-else>Перейти к оплате →</span>
+            <template v-else>
+              <img :src="'/crypto.png'" alt="Crypto" style="height:30px;" />
+            </template>
           </button>
         </div>
 
@@ -281,14 +367,20 @@ const qrSrc = computed(() => {
 
           <h2 class="card-title">Оплата</h2>
           <p class="card-sub">
-            <template v-if="method === 'cloudtips'">Отсканируйте QR в приложении банка через СБП</template>
+            <template v-if="method === 'cloudtips'">
+              <template v-if="activeMethod === 'tpay'">Отсканируйте QR через приложение ТБанк</template>
+              <template v-else>Отсканируйте QR в приложении банка через СБП</template>
+            </template>
             <template v-else>Отсканируйте QR или откройте в Telegram</template>
           </p>
 
           <div class="qr-box">
-            <img v-if="qrSrc" :src="qrSrc" alt="QR код для оплаты" class="qr-img" />
-            <div v-else class="qr-placeholder">
-              <span class="spinner large" />
+            <div class="qr-wrapper">
+              <img v-if="qrSrc" :src="qrSrc" alt="QR код для оплаты" class="qr-img" />
+              <div v-else class="qr-placeholder">
+                <span class="spinner large" />
+              </div>
+              <img v-if="activeMethod === 'tpay'" src="/tpay_qr_logo.png" alt="TPay" class="qr-overlay" />
             </div>
           </div>
 
@@ -564,6 +656,43 @@ const qrSrc = computed(() => {
 .pay-btn:active:not(:disabled) { transform: translateY(0); }
 .pay-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
+.sbp-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.sbp-buttons .pay-btn {
+  margin-top: 0;
+}
+
+.tpay-btn {
+  background: #ffdd2d !important;
+  border-color: #e8c800 !important;
+}
+
+.tpay-btn:hover:not(:disabled) {
+  background: #f0d000 !important;
+}
+
+.sbp-btn {
+  background: #f5f1e8 !important;
+  border-color: #e8e0cc !important;
+}
+
+.sbp-btn:hover:not(:disabled) {
+  background: #ece4d0 !important;
+}
+
+.crypto {
+  background: #51a9f0 !important;
+}
+
+.crypto:hover:not(:disabled) {
+  background: #4ca2e6 !important;
+}
+
 .spinner {
   width: 18px;
   height: 18px;
@@ -614,6 +743,22 @@ const qrSrc = computed(() => {
 
 .qr-amount { font-size: 22px; font-weight: 700; color: #000; font-family: Comfortaa, serif; }
 .qr-name { font-size: 13px; color: rgba(0, 0, 0, 0.5); font-family: Comfortaa, serif; }
+
+.qr-wrapper {
+  position: relative;
+  display: inline-flex;
+}
+
+.qr-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 52px;
+  height: 52px;
+  border-radius: 8px;
+  pointer-events: none;
+}
 
 .open-btn {
   display: block;
@@ -673,11 +818,6 @@ const qrSrc = computed(() => {
   0% { transform: scale(0); opacity: 0; }
   100% { transform: scale(1); opacity: 1; }
 }
-
-.fade-slide-enter-active,
-.fade-slide-leave-active { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-.fade-slide-enter-from { opacity: 0; transform: translateY(16px) scale(0.98); }
-.fade-slide-leave-to { opacity: 0; transform: translateY(-12px) scale(0.98); }
 
 @media (max-width: 480px) {
   .card { padding: 28px 18px 24px; border-radius: 14px; }
