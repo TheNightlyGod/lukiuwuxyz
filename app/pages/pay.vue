@@ -2,13 +2,13 @@
 import { ref, computed } from 'vue'
 
 type Region = 'ru' | 'other' | null
-type Step = 'region' | 'form' | 'qr' | 'success' | 'failed'
-type Method = 'cloudtips' | 'cryptobot'
+type Step = 'region' | 'form' | 'currency' | 'qr' | 'success' | 'failed'
+type Method = 'cloudtips' | 'crypto'
 
 const step = ref<Step>('region')
 const region = ref<Region>(null)
-const method = computed<Method>(() => region.value === 'ru' ? 'cloudtips' : 'cryptobot')
-const activeMethod = ref<'tpay' | 'sbp' | null>(null)
+const method = computed<Method>(() => region.value === 'ru' ? 'cloudtips' : 'crypto')
+const activeMethod = ref<'tpay' | 'sbp' | 'cryptobot' | 'nowpayments' | null>(null)
 
 const name = ref('')
 const comment = ref('')
@@ -33,10 +33,21 @@ const transactionId = ref<number | string | null>(null)
 const loading = ref(false)
 const error = ref('')
 
+const payCurrency = ref('ton')
+const cryptoPayAmount = ref<number | null>(null)
+const cryptoPayCurrency = ref('')
+
+const currencies = [
+  { id: 'ton', label: 'TON', icon: '💎' },
+  { id: 'btc', label: 'Bitcoin', icon: '₿' },
+  { id: 'eth', label: 'Ethereum', icon: '⟠' },
+  { id: 'ltc', label: 'Litecoin', icon: '🪙' },
+]
+
 const MAX_POLL_ATTEMPTS = 60
 let pollAttempts = 0
 const CRYPTO_POLL_INTERVAL_MS = 4_000
-let pollTimer: ReturnType<typeof setInterval> | null = null
+let pollTimer: ReturnType<typeof setTimeout> | null = null
 
 onMounted(() => {
   detectDevice()
@@ -58,7 +69,7 @@ function detectDevice() {
     const chrome = brands.find(b => b.brand === 'Google Chrome' || b.brand === 'Chromium')
     const edge   = brands.find(b => b.brand === 'Microsoft Edge' || b.brand.includes('Edge'))
 
-    if (edge)   deviceInfo.value.browser = 'Edge'
+    if (edge)        deviceInfo.value.browser = 'Edge'
     else if (chrome) deviceInfo.value.browser = 'Chrome'
     else if (brands.length) deviceInfo.value.browser = brands[0].brand || 'Unknown'
   } else {
@@ -68,11 +79,11 @@ function detectDevice() {
     else if (/safari\//.test(ua))  deviceInfo.value.browser = 'Safari'
     else if (/opr\//.test(ua))     deviceInfo.value.browser = 'Opera'
 
-    if (/windows/.test(ua))     deviceInfo.value.os = 'Windows'
+    if (/windows/.test(ua))                 deviceInfo.value.os = 'Windows'
     else if (/mac os x|macintosh/.test(ua)) deviceInfo.value.os = 'macOS'
-    else if (/android/.test(ua)) deviceInfo.value.os = 'Android'
-    else if (/iphone|ipad|ipod/.test(ua)) deviceInfo.value.os = 'iOS'
-    else if (/linux/.test(ua))  deviceInfo.value.os = 'Linux'
+    else if (/android/.test(ua))            deviceInfo.value.os = 'Android'
+    else if (/iphone|ipad|ipod/.test(ua))   deviceInfo.value.os = 'iOS'
+    else if (/linux/.test(ua))              deviceInfo.value.os = 'Linux'
   }
 }
 
@@ -86,6 +97,8 @@ function goBack() {
   if (step.value === 'form') {
     step.value = 'region'
     region.value = null
+  } else if (step.value === 'currency') {
+    step.value = 'form'
   } else if (step.value === 'qr') {
     step.value = 'form'
   } else if (step.value === 'failed') {
@@ -106,11 +119,14 @@ function restart() {
   universalLinkUrl.value = ''
   transactionId.value = null
   error.value = ''
+  payCurrency.value = 'ton'
+  cryptoPayAmount.value = null
+  cryptoPayCurrency.value = ''
 }
 
 function stopPolling() {
   if (pollTimer) {
-    clearInterval(pollTimer)
+    clearTimeout(pollTimer)
     pollTimer = null
   }
 }
@@ -158,7 +174,7 @@ async function createCryptobotInvoice() {
   const amountVal = parseFloat(amount.value)
   if (!amountVal || amountVal <= 0) throw new Error('Введите корректную сумму')
 
-  const res = await $fetch<any>('/api/crypto/invoice', {
+  const res = await $fetch<any>('/api/cryptobot/invoice', {
     method: 'POST',
     body: {
       amount: amountVal,
@@ -181,6 +197,28 @@ async function createCryptobotInvoice() {
   startPolling()
 }
 
+async function createNowpaymentsInvoice() {
+  const amountVal = parseFloat(amount.value)
+  if (!amountVal || amountVal <= 0) throw new Error('Введите корректную сумму')
+
+  const res = await $fetch<any>('/api/nowpayments/invoice', {
+    method: 'POST',
+    body: { amount: amountVal, comment: comment.value || '', pay_currency: payCurrency.value },
+  })
+
+  transactionId.value = res.payment_id
+  cryptoPayAmount.value = res.pay_amount
+  cryptoPayCurrency.value = res.pay_currency?.toUpperCase() || ''
+
+  universalLinkUrl.value = ''
+  qrImageBase64.value = ''
+  qrFallbackUrl.value = res.pay_address
+      ? `https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=${encodeURIComponent(res.pay_address)}`
+      : ''
+
+  startPolling()
+}
+
 async function pollStatus() {
   if (pollAttempts++ > MAX_POLL_ATTEMPTS) {
     stopPolling()
@@ -195,21 +233,24 @@ async function pollStatus() {
       res = await $fetch<any>(`/api/sbp/status?transactionId=${transactionId.value}`)
       const status = res?.data?.status
       if (status === 2 || status?.toLowerCase() === 'success') {
-        step.value = 'success'
-        stopPolling()
-        return
+        step.value = 'success'; stopPolling(); return
       }
       if (status === 3 || status?.toLowerCase() === 'failed') {
-        step.value = 'failed'
-        stopPolling()
-        return
+        step.value = 'failed'; stopPolling(); return
       }
-    } else {
-      res = await $fetch<any>(`/api/crypto/status?invoiceId=${transactionId.value}`)
+    } else if (activeMethod.value === 'cryptobot') {
+      res = await $fetch<any>(`/api/cryptobot/status?invoiceId=${transactionId.value}`)
       if (res?.ok && res.result?.items?.[0]?.status === 'paid') {
-        step.value = 'success'
-        stopPolling()
-        return
+        step.value = 'success'; stopPolling(); return
+      }
+    } else if (activeMethod.value === 'nowpayments') {
+      res = await $fetch<any>(`/api/nowpayments/status?paymentId=${transactionId.value}`)
+      const status = res?.payment_status
+      if (status === 'finished' || status === 'confirmed') {
+        step.value = 'success'; stopPolling(); return
+      }
+      if (status === 'failed' || status === 'expired' || status === 'refunded') {
+        step.value = 'failed'; stopPolling(); return
       }
     }
 
@@ -239,7 +280,7 @@ async function pay() {
       await createBankPayment()
       step.value = 'qr'
       startPolling()
-    } else {
+    } else if (activeMethod.value === 'cryptobot') {
       await createCryptobotInvoice()
       step.value = 'qr'
     }
@@ -250,8 +291,30 @@ async function pay() {
   }
 }
 
-async function payWith(m: 'tpay' | 'sbp') {
+async function confirmCurrency() {
+  error.value = ''
+  loading.value = true
+  try {
+    await createNowpaymentsInvoice()
+    step.value = 'qr'
+  } catch (e: any) {
+    error.value = e.message || 'Произошла ошибка'
+  } finally {
+    loading.value = false
+  }
+}
+
+async function payWith(m: 'tpay' | 'sbp' | 'cryptobot' | 'nowpayments') {
   activeMethod.value = m
+  if (m === 'nowpayments') {
+    if (!amount.value || parseFloat(amount.value) <= 0) {
+      error.value = 'Пожалуйста, укажите сумму'
+      return
+    }
+    error.value = ''
+    step.value = 'currency'
+    return
+  }
   await pay()
 }
 
@@ -267,7 +330,6 @@ const qrSrc = computed(() => {
     <div class="card-wrap">
       <Transition name="fade-slide" mode="out-in">
 
-        <!-- ── ВЫБОР РЕГИОНА ── -->
         <div v-if="step === 'region'" key="region" class="card">
           <div class="card-icon">💜</div>
           <h1 class="card-title">Поддержать</h1>
@@ -286,7 +348,6 @@ const qrSrc = computed(() => {
           </div>
         </div>
 
-        <!-- ── ФОРМА ── -->
         <div v-else-if="step === 'form'" key="form" class="card">
           <button class="back-btn" @click="goBack">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
@@ -339,25 +400,64 @@ const qrSrc = computed(() => {
             <button class="pay-btn tpay-btn" :disabled="loading" @click="payWith('tpay')">
               <span v-if="loading && activeMethod === 'tpay'" class="spinner" />
               <template v-else>
-                <img :src="'/tpay.svg'" alt="TPay" style="height:30px;" />
+                <img src="/tpay.svg" alt="TPay" style="height:30px;" />
               </template>
             </button>
             <button class="pay-btn sbp-btn" :disabled="loading" @click="payWith('sbp')">
               <span v-if="loading && activeMethod === 'sbp'" class="spinner" />
               <template v-else>
-                <img :src="'/sbp.svg'" alt="СБП" style="height:30px;" />
+                <img src="/sbp.svg" alt="СБП" style="height:30px;" />
               </template>
             </button>
           </div>
-          <button v-if="method === 'cryptobot'" class="pay-btn crypto" :disabled="loading" @click="pay">
+
+          <div v-if="method === 'crypto'" class="crypto-buttons">
+            <button class="pay-btn crypto" :disabled="loading" @click="payWith('cryptobot')">
+              <span v-if="loading && activeMethod === 'cryptobot'" class="spinner" />
+              <template v-else>
+                <img src="/crypto.png" alt="Crypto" style="height:30px;" />
+              </template>
+            </button>
+            <button class="pay-btn nowpayments" :disabled="loading" @click="payWith('nowpayments')">
+              <span v-if="loading && activeMethod === 'nowpayments'" class="spinner" />
+              <template v-else>
+                <img src="https://nowpayments.io/images/embeds/donation-button-white.svg" alt="NOWPayments" style="height:30px;" />
+              </template>
+            </button>
+          </div>
+        </div>
+
+        <div v-else-if="step === 'currency'" key="currency" class="card">
+          <button class="back-btn" @click="goBack">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+          </button>
+
+          <h2 class="card-title">Выбор валюты</h2>
+          <p class="card-sub">В чём хотите оплатить?</p>
+
+          <div class="currency-grid">
+            <button
+                v-for="c in currencies"
+                :key="c.id"
+                class="currency-btn"
+                :class="{ active: payCurrency === c.id }"
+                @click="payCurrency = c.id"
+            >
+              <span class="currency-icon">{{ c.icon }}</span>
+              <span class="currency-label">{{ c.label }}</span>
+            </button>
+          </div>
+
+          <p v-if="error" class="error-msg">{{ error }}</p>
+
+          <button class="pay-btn nowpayments" :disabled="loading" @click="confirmCurrency">
             <span v-if="loading" class="spinner" />
-            <template v-else>
-              <img :src="'/crypto.png'" alt="Crypto" style="height:30px;" />
-            </template>
+            <template v-else>Оплатить в {{ currencies.find(c => c.id === payCurrency)?.label }}</template>
           </button>
         </div>
 
-        <!-- ── QR КОД ── -->
         <div v-else-if="step === 'qr'" key="qr" class="card">
           <button class="back-btn" @click="goBack">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
@@ -371,7 +471,10 @@ const qrSrc = computed(() => {
               <template v-if="activeMethod === 'tpay'">Отсканируйте QR через приложение ТБанк</template>
               <template v-else>Отсканируйте QR в приложении банка через СБП</template>
             </template>
-            <template v-else>Отсканируйте QR или откройте в Telegram</template>
+            <template v-else>
+              <template v-if="activeMethod === 'nowpayments'">Отсканируйте QR в крипто кошельке</template>
+              <template v-else>Отсканируйте QR или откройте в Telegram</template>
+            </template>
           </p>
 
           <div class="qr-box">
@@ -389,6 +492,12 @@ const qrSrc = computed(() => {
             <span v-if="name" class="qr-name">от {{ name }}</span>
           </div>
 
+          <div v-if="activeMethod === 'nowpayments' && cryptoPayAmount" class="crypto-amount-box">
+            <span class="crypto-amount-label">Отправить точно</span>
+            <span class="crypto-amount-value">{{ cryptoPayAmount }} {{ cryptoPayCurrency }}</span>
+            <span class="crypto-amount-hint">на указанный адрес кошелька</span>
+          </div>
+
           <a v-if="universalLinkUrl" :href="universalLinkUrl" target="_blank" class="open-btn">
             {{ method === 'cloudtips' ? 'Открыть в приложении банка ↗' : 'Открыть в Telegram ↗' }}
           </a>
@@ -399,7 +508,6 @@ const qrSrc = computed(() => {
           </div>
         </div>
 
-        <!-- ── УСПЕХ ── -->
         <div v-else-if="step === 'success'" key="success" class="card result-card">
           <div class="result-icon">🎉</div>
           <h2 class="card-title">Спасибо!</h2>
@@ -407,7 +515,6 @@ const qrSrc = computed(() => {
           <button class="pay-btn" @click="restart">Задонатить ещё</button>
         </div>
 
-        <!-- ── ОШИБКА ── -->
         <div v-else-if="step === 'failed'" key="failed" class="card result-card">
           <div class="result-icon">😔</div>
           <h2 class="card-title">Оплата не прошла</h2>
@@ -656,14 +763,16 @@ const qrSrc = computed(() => {
 .pay-btn:active:not(:disabled) { transform: translateY(0); }
 .pay-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-.sbp-buttons {
+.sbp-buttons,
+.crypto-buttons {
   display: flex;
   flex-direction: column;
   gap: 10px;
   margin-top: 16px;
 }
 
-.sbp-buttons .pay-btn {
+.sbp-buttons .pay-btn,
+.crypto-buttons .pay-btn {
   margin-top: 0;
 }
 
@@ -692,6 +801,46 @@ const qrSrc = computed(() => {
 .crypto:hover:not(:disabled) {
   background: #4ca2e6 !important;
 }
+
+.nowpayments {
+  background: #00b259 !important;
+  color: #fff !important;
+}
+
+.nowpayments:hover:not(:disabled) {
+  background: #00a050 !important;
+}
+
+.currency-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.currency-btn {
+  background: rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  padding: 16px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: Comfortaa, serif;
+}
+
+.currency-btn:hover,
+.currency-btn.active {
+  background: rgba(0, 178, 89, 0.12);
+  border-color: rgba(0, 178, 89, 0.4);
+  transform: translateY(-2px);
+}
+
+.currency-icon { font-size: 28px; }
+.currency-label { font-size: 12px; font-weight: 700; color: #000; font-family: Comfortaa, serif; }
 
 .spinner {
   width: 18px;
@@ -758,6 +907,39 @@ const qrSrc = computed(() => {
   height: 52px;
   border-radius: 8px;
   pointer-events: none;
+}
+
+.crypto-amount-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  background: rgba(0, 178, 89, 0.08);
+  border: 1px solid rgba(0, 178, 89, 0.25);
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin-bottom: 12px;
+}
+
+.crypto-amount-label {
+  font-size: 11px;
+  color: rgba(0, 0, 0, 0.45);
+  font-family: Comfortaa, serif;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.crypto-amount-value {
+  font-size: 22px;
+  font-weight: 700;
+  color: #00a050;
+  font-family: Comfortaa, serif;
+}
+
+.crypto-amount-hint {
+  font-size: 11px;
+  color: rgba(0, 0, 0, 0.4);
+  font-family: Comfortaa, serif;
 }
 
 .open-btn {

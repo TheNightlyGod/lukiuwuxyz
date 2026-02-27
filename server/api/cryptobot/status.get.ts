@@ -1,4 +1,4 @@
-// server/api/crypto/status.get.ts
+// server/api/cryptobot/status.get.ts
 
 export default defineEventHandler(async (event) => {
     const query = getQuery(event)
