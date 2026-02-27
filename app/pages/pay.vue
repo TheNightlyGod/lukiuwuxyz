@@ -8,7 +8,7 @@ type Method = 'cloudtips' | 'crypto'
 const step = ref<Step>('region')
 const region = ref<Region>(null)
 const method = computed<Method>(() => region.value === 'ru' ? 'cloudtips' : 'crypto')
-const activeMethod = ref<'tpay' | 'sbp' | 'cryptobot' | 'nowpayments' | null>(null)
+const activeMethod = ref<'tpay' | 'sbp' | 'cryptobot' | 'rocket' | 'nowpayments' | null>(null)
 
 const name = ref('')
 const comment = ref('')
@@ -34,6 +34,7 @@ const loading = ref(false)
 const error = ref('')
 
 const payCurrency = ref('ton')
+const rocketCurrency = ref('USDT')
 const cryptoPayAmount = ref<number | null>(null)
 const cryptoPayCurrency = ref('')
 
@@ -42,6 +43,13 @@ const currencies = [
   { id: 'btc', label: 'Bitcoin', icon: '₿' },
   { id: 'eth', label: 'Ethereum', icon: '⟠' },
   { id: 'ltc', label: 'Litecoin', icon: '🪙' },
+]
+const rocketCurrencies = [
+  { id: 'USDT', label: 'USDT', icon: '💵' },
+  { id: 'TONCOIN', label: 'TON', icon: '💎' },
+  { id: 'BTC', label: 'Bitcoin', icon: '₿' },
+  { id: 'ETH', label: 'Ethereum', icon: '⟠' },
+  { id: 'NOT', label: 'Notcoin', icon: '🔔' },
 ]
 
 const MAX_POLL_ATTEMPTS = 60
@@ -219,6 +227,32 @@ async function createNowpaymentsInvoice() {
   startPolling()
 }
 
+async function createRocketInvoice() {
+  const amountVal = parseFloat(amount.value)
+  if (!amountVal || amountVal <= 0) throw new Error('Введите корректную сумму')
+
+  const res = await $fetch<any>('/api/rocket/invoice', {
+    method: 'POST',
+    body: {
+      amount: amountVal,
+      currency: rocketCurrency.value,
+      name: name.value || '',
+      comment: comment.value || '',
+    },
+  })
+
+  if (!res?.success) throw new Error('Ошибка создания счёта Rocket')
+
+  const invoice = res.data
+  transactionId.value = invoice.id
+  universalLinkUrl.value = invoice.link || ''
+
+  qrImageBase64.value = ''
+  qrFallbackUrl.value = universalLinkUrl.value
+      ? `https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=${encodeURIComponent(universalLinkUrl.value)}`
+      : ''
+}
+
 async function pollStatus() {
   if (pollAttempts++ > MAX_POLL_ATTEMPTS) {
     stopPolling()
@@ -251,6 +285,19 @@ async function pollStatus() {
       }
       if (status === 'failed' || status === 'expired' || status === 'refunded') {
         step.value = 'failed'; stopPolling(); return
+      }
+    } else if (activeMethod.value === 'rocket') {
+      res = await $fetch<any>(`/api/rocket/status?invoiceId=${transactionId.value}`)
+      const status = res?.data?.status
+      if (status === 'paid') {
+        step.value = 'success';
+        stopPolling();
+        return
+      }
+      if (status === 'expired') {
+        step.value = 'failed';
+        stopPolling();
+        return
       }
     }
 
@@ -295,8 +342,13 @@ async function confirmCurrency() {
   error.value = ''
   loading.value = true
   try {
-    await createNowpaymentsInvoice()
+    if (activeMethod.value === 'rocket') {
+      await createRocketInvoice()
+    } else if (activeMethod.value === 'nowpayments') {
+      await createNowpaymentsInvoice()
+    }
     step.value = 'qr'
+    startPolling()
   } catch (e: any) {
     error.value = e.message || 'Произошла ошибка'
   } finally {
@@ -304,9 +356,9 @@ async function confirmCurrency() {
   }
 }
 
-async function payWith(m: 'tpay' | 'sbp' | 'cryptobot' | 'nowpayments') {
+async function payWith(m: 'tpay' | 'sbp' | 'cryptobot' | 'nowpayments' | 'rocket') {
   activeMethod.value = m
-  if (m === 'nowpayments') {
+  if (m === 'nowpayments' || m === 'rocket') {
     if (!amount.value || parseFloat(amount.value) <= 0) {
       error.value = 'Пожалуйста, укажите сумму'
       return
@@ -418,6 +470,12 @@ const qrSrc = computed(() => {
                 <img src="/crypto.png" alt="Crypto" style="height:30px;" />
               </template>
             </button>
+            <button class="pay-btn rocket-btn" :disabled="loading" @click="payWith('rocket')">
+              <span v-if="loading && activeMethod === 'rocket'" class="spinner" />
+              <template v-else>
+                <img src="/rocket.svg" alt="xRocket" style="height:30px;" />
+              </template>
+            </button>
             <button class="pay-btn nowpayments" :disabled="loading" @click="payWith('nowpayments')">
               <span v-if="loading && activeMethod === 'nowpayments'" class="spinner" />
               <template v-else>
@@ -439,11 +497,11 @@ const qrSrc = computed(() => {
 
           <div class="currency-grid">
             <button
-                v-for="c in currencies"
+                v-for="c in (activeMethod === 'rocket' ? rocketCurrencies : currencies)"
                 :key="c.id"
                 class="currency-btn"
-                :class="{ active: payCurrency === c.id }"
-                @click="payCurrency = c.id"
+                :class="{ active: (activeMethod === 'rocket' ? rocketCurrency : payCurrency) === c.id }"
+                @click="activeMethod === 'rocket' ? rocketCurrency = c.id : payCurrency = c.id"
             >
               <span class="currency-icon">{{ c.icon }}</span>
               <span class="currency-label">{{ c.label }}</span>
@@ -809,6 +867,14 @@ const qrSrc = computed(() => {
 
 .nowpayments:hover:not(:disabled) {
   background: #00a050 !important;
+}
+
+.rocket-btn {
+  background: #f6a623 !important;
+  color: #fff !important;
+}
+.rocket-btn:hover:not(:disabled) {
+  background: #e09515 !important;
 }
 
 .currency-grid {

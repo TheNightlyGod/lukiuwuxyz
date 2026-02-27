@@ -13,3 +13,4 @@ services:
       - CRYPTOBOT_TOKEN=
       - CLOUDTIPS_LAYOUTID=
       - NOWPAYMENTS_TOKEN=
+      - ROCKET_TOKEN=
