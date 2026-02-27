@@ -14,3 +14,4 @@ services:
       - CLOUDTIPS_LAYOUTID=
       - NOWPAYMENTS_TOKEN=
       - ROCKET_TOKEN=
+      - BOT_TOKEN=
