@@ -129,7 +129,7 @@ body::-webkit-scrollbar {
 
 <style scoped>
 .app {
-  background: top url("/back.png?ver=vesna");
+  background: url("/back.png?ver=vesna") center top / cover no-repeat fixed;
   min-height: 100vh;
   width: 100%;
 }
