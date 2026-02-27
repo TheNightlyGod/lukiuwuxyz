@@ -8,7 +8,7 @@ type Method = 'cloudtips' | 'crypto'
 const step = ref<Step>('region')
 const region = ref<Region>(null)
 const method = computed<Method>(() => region.value === 'ru' ? 'cloudtips' : 'crypto')
-const activeMethod = ref<'tpay' | 'sbp' | 'cryptobot' | 'rocket' | 'nowpayments' | null>(null)
+const activeMethod = ref<'tpay' | 'sbp' | 'cryptobot' | 'rocket' | 'nowpayments' | 'stars' | null>(null)
 
 const name = ref('')
 const comment = ref('')
@@ -253,6 +253,25 @@ async function createRocketInvoice() {
       : ''
 }
 
+async function createStarsInvoice() {
+  const amountVal = parseInt(amount.value)
+  if (!amountVal || amountVal < 1) throw new Error('Минимум 1 Star')
+
+  const res = await $fetch<any>('/api/stars/invoice', {
+    method: 'POST',
+    body: {
+      amount: amountVal,
+      name: name.value || '',
+      comment: comment.value || '',
+    },
+  })
+
+  transactionId.value = res.payload
+  universalLinkUrl.value = res.invoice_link
+  qrImageBase64.value = ''
+  qrFallbackUrl.value = `https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=${encodeURIComponent(res.invoice_link)}`
+}
+
 async function pollStatus() {
   if (pollAttempts++ > MAX_POLL_ATTEMPTS) {
     stopPolling()
@@ -299,6 +318,11 @@ async function pollStatus() {
         stopPolling();
         return
       }
+    } else if (activeMethod.value === 'stars') {
+      res = await $fetch<any>(`/api/stars/status?payload=${transactionId.value}`)
+      if (res?.status === 'paid') {
+        step.value = 'success'; stopPolling(); return
+      }
     }
 
     pollTimer = setTimeout(pollStatus, CRYPTO_POLL_INTERVAL_MS)
@@ -330,6 +354,9 @@ async function pay() {
     } else if (activeMethod.value === 'cryptobot') {
       await createCryptobotInvoice()
       step.value = 'qr'
+    } else if (activeMethod.value === 'stars') {
+      await createStarsInvoice()
+      step.value = 'qr'
     }
   } catch (e: any) {
     error.value = e.message || 'Произошла ошибка'
@@ -356,7 +383,7 @@ async function confirmCurrency() {
   }
 }
 
-async function payWith(m: 'tpay' | 'sbp' | 'cryptobot' | 'nowpayments' | 'rocket') {
+async function payWith(m: 'tpay' | 'sbp' | 'cryptobot' | 'nowpayments' | 'rocket' | 'stars') {
   activeMethod.value = m
   if (m === 'nowpayments' || m === 'rocket') {
     if (!amount.value || parseFloat(amount.value) <= 0) {
@@ -395,7 +422,7 @@ const qrSrc = computed(() => {
             <button class="region-btn" @click="selectRegion('other')">
               <span class="region-flag">🌍</span>
               <span class="region-label">Другие страны</span>
-              <span class="region-method">Crypto · CryptoBot</span>
+              <span class="region-method">Crypto · CryptoBot | Rocket | NOWPayments | Telegram Stars</span>
             </button>
           </div>
         </div>
@@ -409,7 +436,7 @@ const qrSrc = computed(() => {
 
           <div class="method-badge">
             <span v-if="method === 'cloudtips'">🏦 СБП · CloudTips</span>
-            <span v-else>₿ Crypto · CryptoBot</span>
+            <span v-else>₿ Crypto · CryptoBot | Rocket | NOWPayments | Telegram Stars</span>
           </div>
 
           <h2 class="card-title">Детали доната</h2>
@@ -481,6 +508,10 @@ const qrSrc = computed(() => {
               <template v-else>
                 <img src="https://nowpayments.io/images/embeds/donation-button-white.svg" alt="NOWPayments" style="height:30px;" />
               </template>
+            </button>
+            <button class="pay-btn stars-btn" :disabled="loading" @click="payWith('stars')">
+              <span v-if="loading && activeMethod === 'stars'" class="spinner" />
+              <template v-else>⭐ Telegram Stars</template>
             </button>
           </div>
         </div>

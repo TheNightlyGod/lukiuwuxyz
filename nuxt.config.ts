@@ -7,5 +7,12 @@ export default defineNuxtConfig({
       head: {
           title: 'yee luki site...',
       }
-  }
+  },
+  nitro: {
+      storage: {
+          payments: {
+              driver: 'memory',
+          },
+        },
+    },
 })
