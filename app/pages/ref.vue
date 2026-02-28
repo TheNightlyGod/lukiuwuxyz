@@ -1,13 +1,5 @@
 <template>
   <div class="ref-main">
-    <div class="ref-background"></div>
-
-    <header class="ref-header-section">
-      <div class="ref-header-content">
-        <img src="/avatar.png" alt="Logo" class="ref-logo" />
-      </div>
-    </header>
-
     <section class="ref-section">
       <div class="ref-container">
         <div class="ref-grid">
@@ -79,7 +71,7 @@ const projects = [
     domain: 'EU DEDICATED/VDS/VPS/GAMING',
     description: 'FREAKHOSTING предлагает хостинг игровых серверов для популярных игр, а также премиум-хостинг VPS и выделенных серверов.',
     buttontext: 'Посетить сайт',
-    image: '/fh.ico',
+    image: '/iconfh.ico',
     link: 'https://lukiuwu.xyz/fg'
   },
   {
@@ -161,36 +153,6 @@ function getShineStyle(i: number, arr: TiltCard[]) {
   min-height: 100vh;
   position: relative;
   overflow: hidden;
-}
-
-.ref-background {
-  position: fixed;
-  inset: 0;
-  background: linear-gradient(135deg, rgba(0, 0, 0, 0.02), rgba(0, 0, 0, 0.08));
-  z-index: -1;
-}
-
-.ref-header-section {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 40px 20px 30px;
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(8px);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-}
-
-.ref-header-content {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.ref-logo {
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
-  object-fit: contain;
 }
 
 .ref-section {
