@@ -51,8 +51,8 @@
 
 <script setup lang="ts">
 const referrals = [
-  { href: 'https://lukiuwu.xyz/p2g',  ico: 'https://play2go.cloud/favicon.ico' },
-  { href: 'https://lukiuwu.xyz/p2gs', ico: 'https://play2go.cloud/favicon.ico' },
+  { href: 'https://lukiuwu.xyz/p2g',  ico: '/p2gicon.ico' },
+  { href: 'https://lukiuwu.xyz/p2gs', ico: '/p2gsicon.ico' },
   { href: 'https://lukiuwu.xyz/fh',   ico: '/iconfh.ico' },
   { href: 'https://lukiuwu.xyz/mjrp', ico: 'https://majestic-rp.ru/favicon.ico' },
 ]
