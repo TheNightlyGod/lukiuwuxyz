@@ -1,9 +1,14 @@
 <template>
   <div class="app">
     <header class="header">
-      <a href="/" class="logo" aria-label="Home">
-        <img src="/avatar.png" alt="Logo" />
-      </a>
+      <div class="left-side">
+        <a href="/" class="logo" aria-label="Home">
+          <img src="/avatar.png" alt="Logo" />
+        </a>
+
+        <SpotifyMiniPlayer />
+        <WeatherMini />
+      </div>
       <div class="social-buttons">
         <a href="https://github.com/TheNightlyGod" target="_blank" class="social-btn" aria-label="GitHub">
           <svg width="24" height="24" viewBox="0 0 24 24">
@@ -130,6 +135,13 @@ body::-webkit-scrollbar {
   gap: 12px;
   pointer-events: auto;
   justify-content: flex-end;
+}
+
+.left-side {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  pointer-events: auto;
 }
 
 .social-btn {
