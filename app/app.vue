@@ -157,13 +157,14 @@ body::-webkit-scrollbar {
   justify-content: center;
   width: 48px;
   height: 48px;
-  background: rgba(0, 0, 0, 0.13);
-  border-radius: 50%;
   color: #000000;
   text-decoration: none;
-  transition: all 0.3s ease;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: all 0.22s ease;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 9999px;
 }
 
 .social-btn img {
@@ -174,9 +175,9 @@ body::-webkit-scrollbar {
 }
 
 .social-btn:hover {
-  background: rgba(255, 255, 255, 0.45);
+  background: rgba(255, 255, 255, 0.16);
   transform: translateY(-2px) scale(1.05);
-  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 14px rgba(255, 255, 255, 0.18);
 }
 
 .social-btn:active {
