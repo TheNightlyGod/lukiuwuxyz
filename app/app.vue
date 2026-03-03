@@ -6,8 +6,10 @@
           <img src="/avatar.png" alt="Logo" />
         </a>
 
-        <SpotifyMiniPlayer />
-        <WeatherMini />
+        <div class="widgets-column">
+          <SpotifyMiniPlayer />
+          <WeatherMini />
+        </div>
       </div>
       <div class="social-buttons">
         <a href="https://github.com/TheNightlyGod" target="_blank" class="social-btn" aria-label="GitHub">
@@ -141,7 +143,12 @@ body::-webkit-scrollbar {
   display: flex;
   align-items: center;
   gap: 16px;
-  pointer-events: auto;
+}
+
+.widgets-column {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .social-btn {
@@ -241,10 +248,25 @@ body::-webkit-scrollbar {
     align-items: flex-start;
   }
 
-  .social-buttons {
-    gap: 10px;
+  .left-side {
     flex-direction: column;
-    align-items: center;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .widgets-column {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    transform: scale(0.85);
+    transform-origin: left top;
+  }
+
+  .social-buttons {
+    flex-direction: column;
+    gap: 10px;
+    flex-shrink: 0;
+    padding-right: 5px;
   }
 
   .social-btn {
@@ -263,6 +285,11 @@ body::-webkit-scrollbar {
 
   .footer-line {
     font-size: 13px;
+  }
+
+  .logo img {
+    width: 40px;
+    height: 40px;
   }
 }
 </style>
