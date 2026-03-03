@@ -1,63 +1,58 @@
 // composables/useSpotifyNowPlaying.ts
-
-import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
-
 export const useSpotifyNowPlaying = () => {
     const { data, pending, error, refresh } = useFetch('/api/spotify/now-playing', {
         key: 'spotify-now-playing',
     })
 
     const localProgressMs = ref(0)
-    const currentTrackId = ref<string | null>(null)
-    let timeoutId: any = null
+    const lastTickTime = ref(Date.now())
+    let timer: any = null
 
-    const updateProgress = () => {
-        if (data.value?.is_playing && data.value.timestamp) {
+    const tick = () => {
+        if (data.value?.is_playing) {
             const now = Date.now()
-            const elapsedSinceSync = now - data.value.timestamp
+            const delta = now - lastTickTime.value
+            lastTickTime.value = now
 
-            const calculated = data.value.progress_ms + elapsedSinceSync
-
-            localProgressMs.value = Math.min(calculated, data.value.duration_ms || 0)
+            localProgressMs.value += delta
 
             if (localProgressMs.value >= (data.value.duration_ms || 0)) {
+                localProgressMs.value = data.value.duration_ms || 0
                 if (!pending.value) refresh()
             }
+        } else {
+            lastTickTime.value = Date.now()
         }
 
-        timeoutId = setTimeout(updateProgress, 500)
+        timer = requestAnimationFrame(tick)
     }
 
-    // Следим за изменением данных
-    watch(data, (newData) => {
-        if (newData) {
-            if (newData.id !== currentTrackId.value) {
-                currentTrackId.value = newData.id
-                localProgressMs.value = newData.progress_ms || 0
-            }
+    watch(data, (newTrack) => {
+        if (newTrack) {
+            localProgressMs.value = newTrack.progress_ms || 0
+            lastTickTime.value = Date.now()
         }
     }, { immediate: true })
 
     onMounted(() => {
-        updateProgress()
+        timer = requestAnimationFrame(tick)
     })
 
     onUnmounted(() => {
-        clearTimeout(timeoutId)
+        if (timer) cancelAnimationFrame(timer)
     })
 
     const animatedProgress = computed(() => {
         const duration = data.value?.duration_ms || 0
-        if (duration === 0) return 0
+        if (!duration) return 0
         return Math.min((localProgressMs.value / duration) * 100, 100)
     })
 
     return {
         track: data,
         pending,
-        error,
         refresh,
         animatedProgress,
-        localProgressMs,
+        localProgressMs
     }
 }
