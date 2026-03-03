@@ -43,7 +43,7 @@ const { weather } = useWeather(600000)
   pointer-events: auto;
   white-space: nowrap;
 
-  height: 48px;
+  height: 50px;
   box-sizing: border-box;
 }
 
