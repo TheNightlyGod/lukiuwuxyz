@@ -8,28 +8,33 @@ export const useSpotifyNowPlaying = () => {
     })
 
     const localProgressMs = ref(0)
-    let animationFrame: number | null = null
+    const currentTrackId = ref<string | null>(null)
+    let timeoutId: any = null
 
     const updateProgress = () => {
         if (data.value?.is_playing && data.value.timestamp) {
             const now = Date.now()
             const elapsedSinceSync = now - data.value.timestamp
-            const currentProgress = data.value.progress_ms + elapsedSinceSync
 
-            localProgressMs.value = Math.min(currentProgress, data.value.duration_ms || Infinity)
+            const calculated = data.value.progress_ms + elapsedSinceSync
 
-            if (localProgressMs.value >= data.value.duration_ms) {
-                setTimeout(() => refresh(), 1000)
-                return
+            localProgressMs.value = Math.min(calculated, data.value.duration_ms || 0)
+
+            if (localProgressMs.value >= (data.value.duration_ms || 0)) {
+                if (!pending.value) refresh()
             }
         }
 
-        animationFrame = window.setTimeout(updateProgress, 250)
+        timeoutId = setTimeout(updateProgress, 500)
     }
 
-    watch(data, (newTrack) => {
-        if (!newTrack?.is_playing) {
-            localProgressMs.value = newTrack?.progress_ms || 0
+    // Следим за изменением данных
+    watch(data, (newData) => {
+        if (newData) {
+            if (newData.id !== currentTrackId.value) {
+                currentTrackId.value = newData.id
+                localProgressMs.value = newData.progress_ms || 0
+            }
         }
     }, { immediate: true })
 
@@ -38,12 +43,13 @@ export const useSpotifyNowPlaying = () => {
     })
 
     onUnmounted(() => {
-        if (animationFrame) clearTimeout(animationFrame)
+        clearTimeout(timeoutId)
     })
 
     const animatedProgress = computed(() => {
-        if (!data.value?.duration_ms) return 0
-        return Math.min(Math.max((localProgressMs.value / data.value.duration_ms) * 100, 0), 100)
+        const duration = data.value?.duration_ms || 0
+        if (duration === 0) return 0
+        return Math.min((localProgressMs.value / duration) * 100, 100)
     })
 
     return {
