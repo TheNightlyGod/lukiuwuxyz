@@ -42,7 +42,6 @@ const { weather } = useWeather(600000)
   overflow: hidden;
   pointer-events: auto;
   white-space: nowrap;
-
   height: 50px;
   box-sizing: border-box;
 }
