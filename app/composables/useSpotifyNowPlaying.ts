@@ -1,4 +1,5 @@
 // composables/useSpotifyNowPlaying.ts
+
 export const useSpotifyNowPlaying = () => {
     const { data, pending, error, refresh } = useFetch('/api/spotify/now-playing', {
         key: 'spotify-now-playing',

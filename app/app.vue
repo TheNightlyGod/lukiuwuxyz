@@ -50,7 +50,7 @@
     <footer class="footer">
       <div class="footer-content">
         <p class="footer-line">Made with love :3 using Nuxt and Vue.</p>
-        <p class="footer-line">Copyright © 2025 lukiuwu. All rights reserved. No copying or editing allowed.</p>
+        <p class="footer-line">Copyright © {{ new Date().getFullYear() }} lukiuwu. All rights reserved. No copying or editing allowed.</p>
       </div>
     </footer>
   </div>
