@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useSpotifyNowPlaying } from '~/composables/useSpotifyNowPlaying'
 
-const { track, animatedProgress } = useSpotifyNowPlaying(15000)
+const { track, animatedProgress } = useSpotifyNowPlaying()
 </script>
 
 <template>
