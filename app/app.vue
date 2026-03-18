@@ -1,5 +1,5 @@
 <template>
-  <div class="app">
+  <div class="app" :class="{ 'pay-route': $route.path === '/pay' }">
     <header class="header">
       <div class="left-side">
         <a href="/" class="logo" aria-label="Home">
@@ -291,6 +291,25 @@ body::-webkit-scrollbar {
   .logo img {
     width: 40px;
     height: 40px;
+  }
+
+  /* На странице доната делаем хедер максимально лёгким: оставляем только логотип */
+  .pay-route .widgets-column {
+    display: none;
+  }
+
+  .pay-route .social-buttons {
+    display: none;
+  }
+
+  .pay-route .left-side {
+    flex-direction: row;
+    align-items: center;
+    gap: 0;
+  }
+
+  .pay-route .header {
+    align-items: center;
   }
 }
 </style>
