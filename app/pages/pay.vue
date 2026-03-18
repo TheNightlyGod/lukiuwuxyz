@@ -693,6 +693,7 @@ const qrSrc = computed(() => {
   cursor: pointer;
   transition: all 0.25s ease;
   font-family: Comfortaa, serif;
+  min-width: 0;
 }
 
 .region-btn:hover {
@@ -703,7 +704,16 @@ const qrSrc = computed(() => {
 
 .region-flag { font-size: 32px; }
 .region-label { font-size: 14px; font-weight: 700; color: #000; font-family: Comfortaa, serif; }
-.region-method { font-size: 11px; color: rgba(0, 0, 0, 0.5); font-family: Comfortaa, serif; }
+.region-method {
+  font-size: 11px;
+  color: rgba(0, 0, 0, 0.5);
+  font-family: Comfortaa, serif;
+  text-align: center;
+  line-height: 1.25;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
 
 .back-btn {
   position: absolute;
@@ -1098,7 +1108,54 @@ const qrSrc = computed(() => {
   100% { transform: scale(1); opacity: 1; }
 }
 
+@media (max-width: 768px) {
+  .card-wrap {
+    max-width: 360px;
+  }
+
+  .card {
+    width: 100%;
+    padding: 32px 22px 28px;
+    max-height: calc(100vh - 140px);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .card-icon {
+    animation: none;
+  }
+
+  .card-title {
+    font-size: 24px;
+  }
+
+  .region-btn {
+    padding: 16px 10px;
+  }
+
+  .region-btn:hover {
+    transform: none;
+    box-shadow: none;
+  }
+
+  .region-flag {
+    font-size: 28px;
+  }
+
+  .region-method {
+    font-size: 10px;
+  }
+
+  .qr-img {
+    width: 190px;
+    height: 190px;
+  }
+}
+
 @media (max-width: 480px) {
+  .card-wrap {
+    max-width: 320px;
+  }
   .card { padding: 28px 18px 24px; border-radius: 14px; }
   .card-title { font-size: 22px; }
   .region-grid { gap: 10px; }

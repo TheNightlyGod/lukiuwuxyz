@@ -7,11 +7,10 @@
             v-for="(p, i) in projects"
             :key="i"
             class="ref-card"
-            @mousemove="handleTiltMouseMove($event, i, cards)"
-            @mouseleave="resetTiltCard(i, cards)"
-            :style="getCardStyle(i, cards)"
+            @pointermove="handleTiltPointerMove($event)"
+            @pointerleave="resetTiltCard($event)"
           >
-            <div class="card-shine" :style="getShineStyle(i, cards)"></div>
+            <div class="card-shine"></div>
             <div class="card-content">
               <div class="ref-top">
                 <div class="ref-header">
@@ -39,8 +38,6 @@
 </template>
 
 <script setup lang="ts">
-import { reactive } from 'vue'
-
 const projects = [
   {
     title: 'Majestic RP',
@@ -92,59 +89,140 @@ const projects = [
   },
 ]
 
-const cards = reactive(projects.map(() => ({ rx: 0, ry: 0, shineX: 50, shineY: 50, hovering: false, scale: 1 })))
+type TiltVars = { rx: number; ry: number; shineX: number; shineY: number; scale: number }
 
-type TiltCard = { rx: number; ry: number; shineX: number; shineY: number; hovering: boolean; scale: number }
+const MAX_TILT_DEG = 8
 
-function handleTiltMouseMove(e: MouseEvent, i: number, arr: TiltCard[]) {
-  const card = arr[i]
-  if (!card) return
+// target - куда стремимся (меняется на pointermove), current - фактическое значение (плавно "догоняет" target).
+const targetByEl = new WeakMap<HTMLElement, TiltVars>()
+const currentByEl = new WeakMap<HTMLElement, TiltVars>()
+const rafByEl = new WeakMap<HTMLElement, number>()
+const rectByEl = new WeakMap<HTMLElement, DOMRect>()
+
+let tiltEnabled: boolean | null = null
+
+function canUseTilt(pointerType?: string) {
+  if (pointerType === 'touch') return false
+  if (typeof window === 'undefined') return false
+  if (tiltEnabled === null) {
+    const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
+    const coarsePointer = window.matchMedia?.('(pointer: coarse)').matches ?? false
+    tiltEnabled = !reducedMotion && !coarsePointer
+  }
+  return tiltEnabled
+}
+
+const DEFAULT_VARS: TiltVars = { rx: 0, ry: 0, shineX: 50, shineY: 50, scale: 1 }
+const TILT_LERP = 0.2
+const TILT_EPS = 0.05 // deg
+const SHINE_EPS = 0.2 // percent
+
+function applyVars(el: HTMLElement) {
+  const cur = currentByEl.get(el)
+  const tgt = targetByEl.get(el)
+  if (!cur || !tgt) return false
+
+  cur.rx += (tgt.rx - cur.rx) * TILT_LERP
+  cur.ry += (tgt.ry - cur.ry) * TILT_LERP
+  cur.shineX += (tgt.shineX - cur.shineX) * TILT_LERP
+  cur.shineY += (tgt.shineY - cur.shineY) * TILT_LERP
+  cur.scale += (tgt.scale - cur.scale) * TILT_LERP
+
+  el.style.setProperty('--rx', `${cur.rx}deg`)
+  el.style.setProperty('--ry', `${cur.ry}deg`)
+  el.style.setProperty('--shineX', `${cur.shineX}%`)
+  el.style.setProperty('--shineY', `${cur.shineY}%`)
+
+  el.style.setProperty('--card-scale', String(cur.scale))
+  return true
+}
+
+function isCloseToTarget(el: HTMLElement) {
+  const cur = currentByEl.get(el)
+  const tgt = targetByEl.get(el)
+  if (!cur || !tgt) return true
+
+  return (
+    Math.abs(tgt.rx - cur.rx) < TILT_EPS &&
+    Math.abs(tgt.ry - cur.ry) < TILT_EPS &&
+    Math.abs(tgt.shineX - cur.shineX) < SHINE_EPS &&
+    Math.abs(tgt.shineY - cur.shineY) < SHINE_EPS &&
+    Math.abs(tgt.scale - cur.scale) < 0.005
+  )
+}
+
+function ensureLoop(el: HTMLElement) {
+  if (rafByEl.has(el)) return
+
+  const tick = () => {
+    const ok = applyVars(el)
+    if (!ok) {
+      rafByEl.delete(el)
+      return
+    }
+
+    if (el.classList.contains('is-hovering') || !isCloseToTarget(el)) {
+      rafByEl.set(el, window.requestAnimationFrame(tick))
+      return
+    }
+
+    const tgt = targetByEl.get(el)
+    if (tgt) {
+      el.style.setProperty('--rx', `${tgt.rx}deg`)
+      el.style.setProperty('--ry', `${tgt.ry}deg`)
+      el.style.setProperty('--shineX', `${tgt.shineX}%`)
+      el.style.setProperty('--shineY', `${tgt.shineY}%`)
+    }
+
+    rafByEl.delete(el)
+    targetByEl.delete(el)
+    currentByEl.delete(el)
+  }
+
+  rafByEl.set(el, window.requestAnimationFrame(tick))
+}
+
+function setTarget(el: HTMLElement, nextTarget: TiltVars) {
+  targetByEl.set(el, nextTarget)
+  if (!currentByEl.has(el)) currentByEl.set(el, { ...DEFAULT_VARS })
+  ensureLoop(el)
+}
+
+function handleTiltPointerMove(e: PointerEvent) {
+  if (!canUseTilt(e.pointerType)) return
+
   const el = e.currentTarget as HTMLElement
-  const rect = el.getBoundingClientRect()
+  if (!el) return
+
+  // На время наведения кэшируем геометрию, чтобы не дергать layout на каждом mousemove.
+  if (!rectByEl.has(el)) rectByEl.set(el, el.getBoundingClientRect())
+  const rect = rectByEl.get(el)
+  if (!rect || rect.width === 0 || rect.height === 0) return
+
   const cx = rect.left + rect.width / 2
   const cy = rect.top + rect.height / 2
   const dx = e.clientX - cx
   const dy = e.clientY - cy
+
   const nx = Math.max(-1, Math.min(1, dx / (rect.width / 2)))
   const ny = Math.max(-1, Math.min(1, dy / (rect.height / 2)))
-  const maxTilt = 8
-  card.rx = ny * maxTilt
-  card.ry = -nx * maxTilt
-  card.shineX = ((e.clientX - rect.left) / rect.width) * 100
-  card.shineY = ((e.clientY - rect.top) / rect.height) * 100
-  card.hovering = true
-  card.scale = 1.02
+
+  const rx = ny * MAX_TILT_DEG
+  const ry = -nx * MAX_TILT_DEG
+  const shineX = ((e.clientX - rect.left) / rect.width) * 100
+  const shineY = ((e.clientY - rect.top) / rect.height) * 100
+
+  setTarget(el, { rx, ry, shineX, shineY, scale: 1.02 })
+  el.classList.add('is-hovering')
 }
 
-function resetTiltCard(i: number, arr: TiltCard[]) {
-  const card = arr[i]
-  if (!card) return
-  card.rx = 0
-  card.ry = 0
-  card.shineX = 50
-  card.shineY = 50
-  card.hovering = false
-  card.scale = 1
-}
+function resetTiltCard(e: PointerEvent) {
+  const el = e.currentTarget as HTMLElement
+  if (!el) return
 
-function getCardStyle(i: number, arr: TiltCard[]) {
-  const c = arr[i]
-  if (!c) return {}
-  return {
-    transform: `perspective(900px) rotateX(${c.rx}deg) rotateY(${c.ry}deg) scale(${c.scale})`,
-    transition: 'transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.3s ease',
-    boxShadow: c.hovering ? '0 30px 60px rgba(0,0,0,0.28)' : '0 18px 45px rgba(0,0,0,0.18)'
-  }
-}
-
-function getShineStyle(i: number, arr: TiltCard[]) {
-  const c = arr[i]
-  if (!c) return {}
-  return {
-    background: `radial-gradient(400px 180px at ${c.shineX}% ${c.shineY}%, rgba(255,255,255,0.12), rgba(255,255,255,0.02), transparent 40%)`,
-    opacity: c.hovering ? 0.95 : 0,
-    transition: 'opacity 0.3s ease, background 0.2s ease'
-  }
+  el.classList.remove('is-hovering')
+  rectByEl.delete(el)
+  setTarget(el, { ...DEFAULT_VARS })
 }
 </script>
 
@@ -194,7 +272,21 @@ function getShineStyle(i: number, arr: TiltCard[]) {
   display: flex;
   flex-direction: column;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transition: box-shadow 0.3s ease;
+  will-change: transform;
+
+  /* Значения для tilt/shine. Меняются через JS (CSS variables). */
+  --rx: 0deg;
+  --ry: 0deg;
+  --shineX: 50%;
+  --shineY: 50%;
+  --card-scale: 1;
+  box-shadow: 0 18px 45px rgba(0,0,0,0.18);
+  transform: perspective(900px) rotateX(var(--rx)) rotateY(var(--ry)) scale(var(--card-scale));
+}
+
+.ref-card.is-hovering {
+  box-shadow: 0 30px 60px rgba(0,0,0,0.28);
 }
 
 .card-shine {
@@ -203,8 +295,18 @@ function getShineStyle(i: number, arr: TiltCard[]) {
   pointer-events: none;
   mix-blend-mode: screen;
   opacity: 0;
-  transition: opacity 0.3s ease, background 0.2s ease;
+  transition: opacity 0.3s ease;
   z-index: 1;
+  background: radial-gradient(
+    400px 180px at var(--shineX) var(--shineY),
+    rgba(255,255,255,0.12),
+    rgba(255,255,255,0.02),
+    transparent 40%
+  );
+}
+
+.ref-card.is-hovering .card-shine {
+  opacity: 0.95;
 }
 
 .card-content {
