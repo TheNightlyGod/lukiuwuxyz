@@ -96,7 +96,7 @@ const projects = [
     description: 'A tool for backing up game saves with support for multiple games and automatic scheduling.',
     tags: [
       { name: 'С#', icon: 'teenyicons:c-sharp-solid' },
-      { name: 'Avalonia', icon: 'simple-icons:avaloniaui' }
+      { name: 'Avalonia', icon: 'simple-icons:avaloniaui' },
     ],
     year: '2025',
     image: 'https://github.com/MultiSavesBackupTool/MSBT/blob/master/msbt_logo.png?raw=true',
@@ -107,7 +107,7 @@ const projects = [
     domain: 'ASCII-Unicode-Base64-and-Binary-convertor',
     description: 'ASCII, Unicode Base64 and Binary convertor!',
     tags: [
-      { name: 'Python', icon: 'mdi:language-python' }
+      { name: 'Python', icon: 'mdi:language-python' },
     ],
     year: '2025',
     image: '/404-error.png',
@@ -120,12 +120,45 @@ const projects = [
     tags: [
       { name: 'TypeScript', icon: 'bxl:typescript' },
       { name: 'Nuxt', icon: 'mdi:nuxt' },
-      { name: 'Vue', icon: 'bxl:vuejs' }
+      { name: 'Vue', icon: 'bxl:vuejs' },
     ],
     year: '2025',
     image: '/avatar.png',
     link: 'https://github.com/TheNightlyGod/lukiuwuxyz'
-  }
+  },
+  {
+    title: 'lukiuwu_bot',
+    domain: 'Ya hz',
+    description: 'The bot is a suggestion for me.',
+    tags: [
+      { name: 'Python', icon: 'mdi:language-python' },
+    ],
+    year: '2025',
+    image: '/404-error.png',
+    link: 'https://t.me/lukiuwu_bot'
+  },
+  {
+    title: 'lunioff_bot',
+    domain: 'Luni',
+    description: 'The Luni project uses AI to create smart filters and triggers for messages. The project is actively developing.',
+    tags: [
+      { name: 'Python', icon: 'mdi:language-python' },
+    ],
+    year: '2026',
+    image: '/404-error.png',
+    link: 'https://t.me/lunioff_bot'
+  },
+  {
+    title: 'lukidown_bot',
+    domain: 'Luki bot for downloads media from anything.',
+    description: 'This bot is designed to download various media from platforms such as YouTube / TikTok / Instagram / Pinterest / Rutube / VK/ Spotify / Shazam / Yandex Music',
+    tags: [
+      { name: 'Python', icon: 'mdi:language-python' },
+    ],
+    year: '2026',
+    image: '/404-error.png',
+    link: 'https://t.me/lukidown_bot'
+  },
 ]
 
 const skills = [
@@ -139,7 +172,7 @@ const skills = [
       { name: 'TypeScript', icon: 'bxl:typescript', link: 'https://www.typescriptlang.org/' },
       { name: 'Vue', icon: 'bxl:vuejs', link: 'https://vuejs.org/' },
       { name: 'Nuxt', icon: 'mdi:nuxt', link: 'https://nuxt.com/' },
-      { name: 'Tailwind', icon: 'mdi:tailwind', link: 'https://tailwindcss.com/' }
+      { name: 'Tailwind', icon: 'mdi:tailwind', link: 'https://tailwindcss.com/' },
     ]
   },
   {
@@ -152,7 +185,7 @@ const skills = [
       { name: 'TypeScript', icon: 'bxl:typescript', link: 'https://www.typescriptlang.org/' },
       { name: 'C# (.NET)', icon: 'teenyicons:c-sharp-solid', link: 'https://learn.microsoft.com/dotnet/csharp' },
       { name: 'C++', icon: 'simple-icons:cplusplus', link: 'https://isocpp.org/' },
-      { name: 'Databases (Postgres / MySQL / MongoDB)', icon: 'mdi:database', link: 'https://www.postgresql.org/' }
+      { name: 'Databases (Postgres / MySQL / MongoDB)', icon: 'mdi:database', link: 'https://www.postgresql.org/' },
     ]
   },
   {
@@ -163,7 +196,7 @@ const skills = [
       { name: 'Docker', icon: 'simple-icons:docker', link: 'https://www.docker.com/' },
       { name: 'Nginx', icon: 'cib:nginx', link: 'https://nginx.org/' },
       { name: 'GitHub', icon: 'mdi:github', link: 'https://github.com/' },
-      { name: 'Caddy', icon: 'simple-icons:caddy', link: 'https://caddyserver.com/' }
+      { name: 'Caddy', icon: 'simple-icons:caddy', link: 'https://caddyserver.com/' },
     ]
   }
 ]
@@ -172,8 +205,6 @@ type TiltVars = { rx: number; ry: number; shineX: number; shineY: number; scale:
 
 const MAX_TILT_DEG = 8
 
-// Обновляем только CSS-переменные у конкретной карточки, минуя Vue-реактивность.
-// target - куда стремимся (меняется на pointermove), current - фактическое значение (плавно "догоняет" target).
 const targetByEl = new WeakMap<HTMLElement, TiltVars>()
 const currentByEl = new WeakMap<HTMLElement, TiltVars>()
 const rafByEl = new WeakMap<HTMLElement, number>()
@@ -194,8 +225,8 @@ function canUseTilt(pointerType?: string) {
 
 const DEFAULT_VARS: TiltVars = { rx: 0, ry: 0, shineX: 50, shineY: 50, scale: 1 }
 const TILT_LERP = 0.2
-const TILT_EPS = 0.05 // deg
-const SHINE_EPS = 0.2 // percent
+const TILT_EPS = 0.05
+const SHINE_EPS = 0.2
 
 function applyVars(el: HTMLElement) {
   const cur = currentByEl.get(el)
@@ -241,13 +272,11 @@ function ensureLoop(el: HTMLElement) {
       return
     }
 
-    // Пока мышь "на карточке" — продолжаем анимацию, иначе отпускаем когда догнали target.
     if (el.classList.contains('is-hovering') || !isCloseToTarget(el)) {
       rafByEl.set(el, window.requestAnimationFrame(tick))
       return
     }
 
-    // Дотягиваем до точного target, чтобы не было микродрожи.
     const tgt = targetByEl.get(el)
     if (tgt) {
       el.style.setProperty('--rx', `${tgt.rx}deg`)
@@ -277,7 +306,6 @@ function handleTiltPointerMove(e: PointerEvent) {
   const el = e.currentTarget as HTMLElement
   if (!el) return
 
-  // На время наведения кэшируем геометрию, чтобы не дергать layout на каждом mousemove.
   if (!rectByEl.has(el)) rectByEl.set(el, el.getBoundingClientRect())
   const rect = rectByEl.get(el)
   if (!rect || rect.width === 0 || rect.height === 0) return
