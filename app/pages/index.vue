@@ -285,7 +285,7 @@ const projects = [
       { name: 'discord.py', icon: 'ic:baseline-discord' },
       { name: 'Docker', icon: 'bxl:docker' },
     ],
-    year: '2026-ATM',
+    year: '2026',
     image: '/botikpaaper.png',
     link: 'https://github.com/TheNightlyGod/botikpaaper'
   },
