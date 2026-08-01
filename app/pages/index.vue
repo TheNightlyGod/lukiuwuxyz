@@ -244,7 +244,7 @@ const projects = [
     ],
     year: '2025',
     image: '/examigo.svg',
-    link: 'https://github.com/d0sh1r4k/ExAmigo'
+    link: 'https://github.com/Halcon5462/ExAmigo'
   },
   {
     title: 'lunioff_bot',
