@@ -7,7 +7,7 @@
             <img src="/3d.png?ver=leto" alt="Avatar" class="profile-avatar" />
             <h1 class="profile-title">TheNightlyGod</h1>
           </div>
-          
+
           <div class="profile-socials">
             <a href="https://github.com/TheNightlyGod" target="_blank" class="social-btn-centered" aria-label="GitHub">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
@@ -30,7 +30,7 @@
             <SpotifyMiniPlayer />
             <WeatherMini />
           </div>
-          
+
           <div class="scroll-indicator" @click="triggerReveal">
             <div class="mouse">
               <div class="wheel"></div>
@@ -50,23 +50,59 @@
               Click to hide projects
             </button>
             <h2 class="projects-title">My Projects</h2>
+
+            <div class="year-filter-row">
+              <button
+                  class="year-filter-btn"
+                  :class="{ active: selectedYear === null }"
+                  @click="selectedYear = null"
+              >
+                All
+              </button>
+              <button
+                  v-for="y in allYears"
+                  :key="y"
+                  class="year-filter-btn"
+                  :class="{ active: selectedYear === y }"
+                  @click="selectedYear = selectedYear === y ? null : y"
+              >
+                {{ y }}
+              </button>
+            </div>
+
+            <div class="status-filter-row">
+              <button
+                  class="status-filter-btn status-archived"
+                  :class="{ active: statusFilters.includes('archived') }"
+                  @click="toggleStatus('archived')"
+              >
+                Archive
+              </button>
+              <button
+                  class="status-filter-btn status-frozen"
+                  :class="{ active: statusFilters.includes('frozen') }"
+                  @click="toggleStatus('frozen')"
+              >
+                Frozen
+              </button>
+            </div>
           </div>
-          
+
           <div class="projects-grid">
             <div
-              v-for="(p, i) in reversedProjects"
-              :key="p.title"
-              class="project-card-wrapper"
+                v-for="(p, i) in filteredProjects"
+                :key="p.title"
+                class="project-card-wrapper"
             >
               <a
-                :href="p.link"
-                target="_blank"
-                class="project-card"
-                @pointermove="handleTiltPointerMove($event)"
-                @pointerleave="resetTiltCard($event)"
+                  :href="p.link"
+                  target="_blank"
+                  class="project-card"
+                  @pointermove="handleTiltPointerMove($event)"
+                  @pointerleave="resetTiltCard($event)"
               >
                 <div class="card-shine"></div>
-                
+
                 <div class="project-card-top">
                   <div class="project-card-header">
                     <img :src="p.image" :alt="p.title" class="project-card-img" />
@@ -77,7 +113,7 @@
                   </div>
                   <p class="project-card-desc">{{ p.description }}</p>
                 </div>
-                
+
                 <div class="project-card-footer">
                   <div class="project-card-tags">
                     <span v-for="tag in p.tags" :key="tag.name" class="project-tag">
@@ -86,6 +122,8 @@
                     </span>
                   </div>
                   <div class="project-card-right">
+                    <span v-if="p.archived" class="project-badge-archived">Archive</span>
+                    <span v-else-if="p.frozen" class="project-badge-frozen">Frozen</span>
                     <span class="project-card-year">{{ p.year }}</span>
                     <span class="project-card-arrow">→</span>
                   </div>
@@ -100,7 +138,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, computed, watch, nextTick, onMounted, onUnmounted } from 'vue'
 
 const referrals = [
   { href: 'https://lukiuwu.xyz/p2g',  ico: '/iconp2g.ico' },
@@ -121,7 +159,8 @@ const projects = [
     ],
     year: '2021',
     image: '/404-error.png',
-    link: 'https://github.com/TheNightlyGod/STPVAWMMER'
+    link: 'https://github.com/TheNightlyGod/STPVAWMMER',
+    archived: true
   },
   {
     title: 'ProjectDressingUp',
@@ -134,7 +173,8 @@ const projects = [
     ],
     year: '2024',
     image: '/404-error.png',
-    link: 'https://github.com/TheNightlyGod/ProjectDressingUp'
+    link: 'https://github.com/TheNightlyGod/ProjectDressingUp',
+    archived: true
   },
   {
     title: 'aub64con',
@@ -145,7 +185,8 @@ const projects = [
     ],
     year: '2025',
     image: '/404-error.png',
-    link: 'https://github.com/TheNightlyGod/aub64con'
+    link: 'https://github.com/TheNightlyGod/aub64con',
+    archived: true
   },
   {
     title: 'lukiuwu_bot',
@@ -169,7 +210,8 @@ const projects = [
     ],
     year: '2025',
     image: '/reztrlbot.jpg',
-    link: 'https://github.com/TheNightlyGod/reztrlbot'
+    link: 'https://github.com/TheNightlyGod/reztrlbot',
+    archived: true
   },
   {
     title: 'lukiuwuxyz',
@@ -194,7 +236,8 @@ const projects = [
     ],
     year: '2025',
     image: '/karmaai.jpg',
-    link: 'https://github.com/TheNightlyGod/karmaai'
+    link: 'https://github.com/TheNightlyGod/karmaai',
+    archived: true
   },
   {
     title: 'MSBT',
@@ -206,7 +249,8 @@ const projects = [
     ],
     year: '2025-2026',
     image: 'https://github.com/MultiSavesBackupTool/MSBT/blob/master/msbt_logo.png?raw=true',
-    link: 'https://github.com/MultiSavesBackupTool/MSBT'
+    link: 'https://github.com/MultiSavesBackupTool/MSBT',
+    frozen: true
   },
   {
     title: 'NyaTime',
@@ -218,7 +262,8 @@ const projects = [
     ],
     year: '2025',
     image: '/NyaTime.png',
-    link: 'https://github.com/TheNightlyGod/NyaTime'
+    link: 'https://github.com/TheNightlyGod/NyaTime',
+    archived: true
   },
   {
     title: 'Pac-Man',
@@ -230,7 +275,8 @@ const projects = [
     ],
     year: '2025',
     image: '/pacman.png',
-    link: 'https://github.com/TheNightlyGod/pacman'
+    link: 'https://github.com/TheNightlyGod/pacman',
+    frozen: true
   },
   {
     title: 'ExAmigo',
@@ -244,7 +290,8 @@ const projects = [
     ],
     year: '2025',
     image: '/examigo.svg',
-    link: 'https://github.com/Halcon5462/ExAmigo'
+    link: 'https://github.com/Halcon5462/ExAmigo',
+    frozen: true
   },
   {
     title: 'lunioff_bot',
@@ -301,14 +348,58 @@ const projects = [
       { name: 'TypeScript', icon: 'bxl:typescript' },
       { name: 'Nuxt', icon: 'mdi:nuxt' },
       { name: 'Vue', icon: 'bxl:vuejs' },
+      { name: 'C++', icon: 'mdi:language-cpp' },
     ],
     year: 'TBA',
     image: '/botikboot.png',
-    link: 'https://t.me/lukioff/333'
+    link: 'https://t.me/lukioff/335'
   },
 ]
 
 const reversedProjects = [...projects].reverse()
+
+function extractYears(y: string): string[] {
+  return y.match(/\d{4}/g) ?? []
+}
+
+const allYears = computed(() => {
+  const set = new Set<string>()
+  projects.forEach(p => extractYears(p.year).forEach(y => set.add(y)))
+  return Array.from(set).sort((a, b) => Number(b) - Number(a))
+})
+
+const selectedYear = ref<string | null>(null)
+
+const statusFilters = ref<string[]>([])
+
+function toggleStatus(status: string) {
+  const idx = statusFilters.value.indexOf(status)
+  if (idx === -1) {
+    statusFilters.value = [...statusFilters.value, status]
+  } else {
+    statusFilters.value = statusFilters.value.filter(s => s !== status)
+  }
+}
+
+const filteredProjects = computed(() => {
+  let list = reversedProjects
+
+  if (selectedYear.value) {
+    list = list.filter(p => extractYears(p.year).includes(selectedYear.value!))
+  }
+
+  if (statusFilters.value.length > 0) {
+    list = list.filter(p => {
+      return statusFilters.value.some(s => {
+        if (s === 'archived') return !!p.archived
+        if (s === 'frozen') return !!p.frozen
+        return false
+      })
+    })
+  }
+
+  return list
+})
 
 type TiltVars = { rx: number; ry: number; shineX: number; shineY: number; scale: number }
 
@@ -363,11 +454,11 @@ function isCloseToTarget(el: HTMLElement) {
   if (!cur || !tgt) return true
 
   return (
-    Math.abs(tgt.rx - cur.rx) < TILT_EPS &&
-    Math.abs(tgt.ry - cur.ry) < TILT_EPS &&
-    Math.abs(tgt.shineX - cur.shineX) < SHINE_EPS &&
-    Math.abs(tgt.shineY - cur.shineY) < SHINE_EPS &&
-    Math.abs(tgt.scale - cur.scale) < 0.005
+      Math.abs(tgt.rx - cur.rx) < TILT_EPS &&
+      Math.abs(tgt.ry - cur.ry) < TILT_EPS &&
+      Math.abs(tgt.shineX - cur.shineX) < SHINE_EPS &&
+      Math.abs(tgt.shineY - cur.shineY) < SHINE_EPS &&
+      Math.abs(tgt.scale - cur.scale) < 0.005
   )
 }
 
@@ -478,7 +569,7 @@ const handleProjectsWheel = (e: WheelEvent) => {
 
 const handleGlobalWheel = (e: WheelEvent) => {
   if (isAnimating) return
-  
+
   if (e.deltaY > 0 && !isScrolled.value) {
     e.preventDefault()
     triggerReveal()
@@ -492,10 +583,10 @@ const handleTouchStart = (e: TouchEvent) => {
 
 const handleTouchMove = (e: TouchEvent) => {
   if (isAnimating) return
-  
+
   const touchEndY = e.touches[0].clientY
   const diffY = touchStartY - touchEndY
-  
+
   if (!isScrolled.value && diffY > 15) {
     triggerReveal()
   } else if (isScrolled.value) {
@@ -510,7 +601,7 @@ onMounted(() => {
   window.addEventListener('wheel', handleGlobalWheel, { passive: false })
   window.addEventListener('touchstart', handleTouchStart, { passive: true })
   window.addEventListener('touchmove', handleTouchMove, { passive: false })
-  
+
   observer.value = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
@@ -518,9 +609,17 @@ onMounted(() => {
       }
     })
   }, { threshold: 0.05 })
-  
+
   document.querySelectorAll('.project-card-wrapper').forEach(el => {
     observer.value?.observe(el)
+  })
+})
+
+watch(filteredProjects, () => {
+  nextTick(() => {
+    document.querySelectorAll('.project-card-wrapper').forEach(el => {
+      observer.value?.observe(el)
+    })
   })
 })
 
@@ -805,9 +904,83 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 28px;
+  gap: 20px;
   margin-bottom: 32px;
   flex-shrink: 0;
+}
+
+.year-filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+
+.year-filter-btn {
+  padding: 6px 16px;
+  background: rgba(0, 0, 0, 0.28);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 9999px;
+  color: rgba(255, 255, 255, 0.75);
+  font-family: Comfortaa, serif;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.22s ease;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.year-filter-btn:hover {
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.year-filter-btn.active {
+  background: #fff;
+  color: #111;
+  border-color: #fff;
+  font-weight: 700;
+}
+
+.status-filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+
+.status-filter-btn {
+  padding: 6px 16px;
+  background: rgba(0, 0, 0, 0.28);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 9999px;
+  color: rgba(255, 255, 255, 0.75);
+  font-family: Comfortaa, serif;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.22s ease;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.status-filter-btn:hover {
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.status-filter-btn.status-archived.active {
+  background: #eab308;
+  color: #1a1400;
+  border-color: #eab308;
+}
+
+.status-filter-btn.status-frozen.active {
+  background: #38bdf8;
+  color: #052a3d;
+  border-color: #38bdf8;
 }
 
 .hide-projects-btn {
@@ -857,7 +1030,7 @@ onUnmounted(() => {
 
 .projects-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   gap: 20px;
   width: 100%;
   max-width: 100%;
@@ -868,7 +1041,7 @@ onUnmounted(() => {
   opacity: 0;
   transform: translateY(35px);
   transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
-              transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
   height: 100%;
 }
 
@@ -897,7 +1070,7 @@ onUnmounted(() => {
   will-change: transform;
   text-align: left;
   min-height: 200px;
-  
+
   --rx: 0deg;
   --ry: 0deg;
   --shineX: 50%;
@@ -925,10 +1098,10 @@ onUnmounted(() => {
   transition: opacity 0.3s ease;
   z-index: 1;
   background: radial-gradient(
-    200px 100px at var(--shineX) var(--shineY),
-    rgba(255, 255, 255, 0.12),
-    rgba(255, 255, 255, 0.02),
-    transparent 50%
+      200px 100px at var(--shineX) var(--shineY),
+      rgba(255, 255, 255, 0.12),
+      rgba(255, 255, 255, 0.02),
+      transparent 50%
   );
 }
 
@@ -1022,6 +1195,26 @@ onUnmounted(() => {
   flex-shrink: 0;
 }
 
+.project-badge-archived {
+  font-size: 10px;
+  font-weight: 700;
+  color: #1a1400;
+  background: #eab308;
+  padding: 2px 8px;
+  border-radius: 6px;
+  letter-spacing: 0.2px;
+}
+
+.project-badge-frozen {
+  font-size: 10px;
+  font-weight: 700;
+  color: #052a3d;
+  background: #38bdf8;
+  padding: 2px 8px;
+  border-radius: 6px;
+  letter-spacing: 0.2px;
+}
+
 .project-card-year {
   font-size: 11px;
   color: rgba(255, 255, 255, 0.6);
@@ -1045,7 +1238,7 @@ onUnmounted(() => {
   .projects-title {
     font-size: 28px;
   }
-  
+
   .project-card {
     padding: 16px;
   }
