@@ -1,6 +1,63 @@
 // server/api/spotify/now-playing.get.ts
 
 export default defineEventHandler(async () => {
+    const SPOTIFY_MODE = process.env.SPOTIFY_MODE || 'api'
+
+    if (SPOTIFY_MODE === 'paaper') {
+        const username = process.env.SPOTIFY_PAAPER_USERNAME || 'thenightlygod'
+        const baseUrl = process.env.SPOTIFY_PAAPER_URL || 'https://paaper.lukiuwu.xyz'
+
+        try {
+            const url = `${baseUrl.replace(/\/+$/, '')}/${username.replace(/^\/+/, '')}`
+            const data = await $fetch<any>(url)
+
+            if (!data || !data.spotify) {
+                return {
+                    is_playing: false,
+                    track_name: null,
+                    artist: null,
+                    album_cover: null,
+                    track_url: null,
+                    progress_ms: 0,
+                    duration_ms: 0,
+                }
+            }
+
+            const spotify = data.spotify
+            const artists = Array.isArray(spotify.artists)
+                ? spotify.artists.join(', ')
+                : (spotify.artist || 'Unknown Artist')
+
+            const duration_ms = spotify.duration_ms || 0
+            const now = Date.now()
+            const start = spotify.start_time_ms
+            const progress_ms = start
+                ? Math.max(0, Math.min(now - start, duration_ms))
+                : (spotify.progress_ms || 0)
+
+            const track_url = spotify.track_id
+                ? `https://open.spotify.com/track/${spotify.track_id}`
+                : null
+
+            return {
+                is_playing: true,
+                track_name: spotify.title || 'Unknown Track',
+                artist: artists,
+                album_cover: spotify.album_cover_url || null,
+                track_url,
+                progress_ms,
+                duration_ms,
+                timestamp: now,
+            }
+        } catch (err: any) {
+            console.error('Paaper now-playing error:', err?.data || err?.message)
+            throw createError({
+                statusCode: 502,
+                message: 'Error loading data from Paaper',
+            })
+        }
+    }
+
     const CLIENT_ID = process.env.SPOTIFY_CLIENT_ID
     const CLIENT_SECRET = process.env.SPOTIFY_CLIENT_SECRET
     const REFRESH_TOKEN = process.env.SPOTIFY_REFRESH_TOKEN
