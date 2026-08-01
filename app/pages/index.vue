@@ -72,11 +72,11 @@
 
             <div class="status-filter-row">
               <button
-                  class="status-filter-btn status-archived"
-                  :class="{ active: statusFilters.includes('archived') }"
-                  @click="toggleStatus('archived')"
+                  class="status-filter-btn status-active"
+                  :class="{ active: statusFilters.includes('active') }"
+                  @click="toggleStatus('active')"
               >
-                Archive
+                Active
               </button>
               <button
                   class="status-filter-btn status-frozen"
@@ -84,6 +84,13 @@
                   @click="toggleStatus('frozen')"
               >
                 Frozen
+              </button>
+              <button
+                  class="status-filter-btn status-archived"
+                  :class="{ active: statusFilters.includes('archived') }"
+                  @click="toggleStatus('archived')"
+              >
+                Archive
               </button>
             </div>
           </div>
@@ -122,9 +129,12 @@
                     </span>
                   </div>
                   <div class="project-card-right">
-                    <span v-if="p.archived" class="project-badge-archived">Archive</span>
-                    <span v-else-if="p.frozen" class="project-badge-frozen">Frozen</span>
-                    <span class="project-card-year">{{ p.year }}</span>
+                    <div class="project-card-badges">
+                      <span v-if="p.archived" class="project-badge-archived">Archive</span>
+                      <span v-else-if="p.frozen" class="project-badge-frozen">Frozen</span>
+                      <span v-else class="project-badge-active">Active</span>
+                      <span class="project-card-year">{{ p.year }}</span>
+                    </div>
                     <span class="project-card-arrow">→</span>
                   </div>
                 </div>
@@ -198,7 +208,8 @@ const projects = [
     ],
     year: '2025-ATM',
     image: '/lukiuwu_bot.png?ver=leto',
-    link: 'https://t.me/lukiuwu_bot'
+    link: 'https://t.me/lukiuwu_bot',
+    active: true
   },
   {
     title: 'reztrlbot',
@@ -225,7 +236,8 @@ const projects = [
     ],
     year: '2025-ATM',
     image: '/3d.png?ver=leto',
-    link: 'https://github.com/TheNightlyGod/lukiuwuxyz'
+    link: 'https://github.com/TheNightlyGod/lukiuwuxyz',
+    active: true
   },
   {
     title: 'karmaai',
@@ -276,7 +288,7 @@ const projects = [
     year: '2025',
     image: '/pacman.png',
     link: 'https://github.com/TheNightlyGod/pacman',
-    frozen: true
+    archived: true
   },
   {
     title: 'ExAmigo',
@@ -306,7 +318,8 @@ const projects = [
     ],
     year: '2026-ATM',
     image: '/luni.png?ver=leto',
-    link: 'https://t.me/lunioff_bot'
+    link: 'https://t.me/lunioff_bot',
+    active: true
   },
   {
     title: 'lukidown_bot',
@@ -321,7 +334,8 @@ const projects = [
     ],
     year: '2026-ATM',
     image: '/lukidown.png?ver=leto',
-    link: 'https://t.me/lukidown_bot'
+    link: 'https://t.me/lukidown_bot',
+    active: true
   },
   {
     title: 'botikpaaper',
@@ -334,7 +348,8 @@ const projects = [
     ],
     year: '2026',
     image: '/botikpaaper.png',
-    link: 'https://github.com/TheNightlyGod/botikpaaper'
+    link: 'https://github.com/TheNightlyGod/botikpaaper',
+    frozen: true
   },
   {
     title: 'botikboot',
@@ -352,7 +367,8 @@ const projects = [
     ],
     year: 'TBA',
     image: '/botikboot.png',
-    link: 'https://t.me/lukioff/335'
+    link: 'https://t.me/lukioff/335',
+    active: true
   },
 ]
 
@@ -391,6 +407,7 @@ const filteredProjects = computed(() => {
   if (statusFilters.value.length > 0) {
     list = list.filter(p => {
       return statusFilters.value.some(s => {
+        if (s === 'active') return !p.archived && !p.frozen
         if (s === 'archived') return !!p.archived
         if (s === 'frozen') return !!p.frozen
         return false
@@ -983,6 +1000,12 @@ onUnmounted(() => {
   border-color: #38bdf8;
 }
 
+.status-filter-btn.status-active.active {
+  background: #22c55e;
+  color: #052e16;
+  border-color: #22c55e;
+}
+
 .hide-projects-btn {
   display: inline-flex;
   align-items: center;
@@ -1195,6 +1218,13 @@ onUnmounted(() => {
   flex-shrink: 0;
 }
 
+.project-card-badges {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
 .project-badge-archived {
   font-size: 10px;
   font-weight: 700;
@@ -1210,6 +1240,16 @@ onUnmounted(() => {
   font-weight: 700;
   color: #052a3d;
   background: #38bdf8;
+  padding: 2px 8px;
+  border-radius: 6px;
+  letter-spacing: 0.2px;
+}
+
+.project-badge-active {
+  font-size: 10px;
+  font-weight: 700;
+  color: #052e16;
+  background: #22c55e;
   padding: 2px 8px;
   border-radius: 6px;
   letter-spacing: 0.2px;
