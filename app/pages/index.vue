@@ -277,6 +277,19 @@ const projects = [
     link: 'https://t.me/lukidown_bot'
   },
   {
+    title: 'botikpaaper',
+    domain: 'Bot for Discord',
+    description: 'I created this bot because I needed a way to parse the track currently playing on Spotify, since I didn\'t have Spotify Premium at the time.',
+    tags: [
+      { name: 'Python', icon: 'mdi:language-python' },
+      { name: 'discord.py', icon: 'ic:baseline-discord' },
+      { name: 'Docker', icon: 'bxl:docker' },
+    ],
+    year: '2026-ATM',
+    image: '/botikpaaper.png',
+    link: 'https://github.com/TheNightlyGod/botikpaaper'
+  },
+  {
     title: 'botikboot',
     domain: 'Bot for Twitch',
     description: 'This bot is currently under development. Its launch will be announced on the Telegram channel.',
