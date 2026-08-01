@@ -12,6 +12,11 @@ const { track, animatedProgress } = useSpotifyNowPlaying()
       class="mini-player"
       aria-label="Now playing in Spotify"
   >
+    <div
+        class="progress-bg"
+        :style="{ width: `${animatedProgress}%` }"
+    ></div>
+
     <img
         v-if="track.album_cover"
         :src="track.album_cover"
@@ -31,13 +36,6 @@ const { track, animatedProgress } = useSpotifyNowPlaying()
         {{ track.artist || 'Spotify' }}
       </div>
     </div>
-
-    <div class="progress-container">
-      <div
-          class="progress-bar"
-          :style="{ width: `${animatedProgress}%` }"
-      ></div>
-    </div>
   </a>
 
   <div v-else class="mini-player empty">
@@ -51,6 +49,7 @@ const { track, animatedProgress } = useSpotifyNowPlaying()
 
 <style scoped>
 .mini-player {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -66,12 +65,30 @@ const { track, animatedProgress } = useSpotifyNowPlaying()
   max-width: 240px;
   overflow: hidden;
   pointer-events: auto;
+  height: 50px;
+  box-sizing: border-box;
 }
 
-.mini-player:hover {
-  background: rgba(30, 215, 96, 0.16);
+.mini-player:not(.empty):hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(30, 215, 96, 0.35);
   transform: translateY(-1px);
   box-shadow: 0 4px 14px rgba(30, 215, 96, 0.18);
+}
+
+.progress-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: rgba(30, 215, 96, 0.2);
+  z-index: 0;
+  transition: width 0.4s ease-out, background-color 0.22s ease;
+  pointer-events: none;
+}
+
+.mini-player:not(.empty):hover .progress-bg {
+  background: rgba(30, 215, 96, 0.32);
 }
 
 .cover {
@@ -81,6 +98,8 @@ const { track, animatedProgress } = useSpotifyNowPlaying()
   object-fit: cover;
   flex-shrink: 0;
   background: #222;
+  position: relative;
+  z-index: 1;
 }
 
 .placeholder {
@@ -91,6 +110,8 @@ const { track, animatedProgress } = useSpotifyNowPlaying()
   flex: 1;
   min-width: 0;
   line-height: 1.15;
+  position: relative;
+  z-index: 1;
 }
 
 .track-name {
@@ -109,22 +130,6 @@ const { track, animatedProgress } = useSpotifyNowPlaying()
   white-space: nowrap;
 }
 
-.progress-container {
-  width: 64px;
-  height: 3px;
-  background: rgba(255, 255, 255, 0.18);
-  border-radius: 2px;
-  overflow: hidden;
-  flex-shrink: 0;
-}
-
-.progress-bar {
-  height: 100%;
-  background: #1ed760;
-  border-radius: 2px;
-  transition: width 0.4s ease-out;
-}
-
 .empty {
   opacity: 0.65;
   cursor: default;
@@ -135,6 +140,7 @@ const { track, animatedProgress } = useSpotifyNowPlaying()
     padding: 5px 11px;
     max-width: 200px;
     gap: 8px;
+    height: 44px;
   }
   .cover {
     width: 32px;
@@ -145,9 +151,6 @@ const { track, animatedProgress } = useSpotifyNowPlaying()
   }
   .artist {
     font-size: 10.5px;
-  }
-  .progress-container {
-    width: 54px;
   }
 }
 </style>
