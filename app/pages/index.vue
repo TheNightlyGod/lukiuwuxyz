@@ -300,7 +300,7 @@ const projects = [
       { name: 'Python', icon: 'mdi:language-python' },
       { name: 'Django', icon: 'bxl:django' },
     ],
-    year: '2025',
+    year: '2026',
     image: '/examigo.svg',
     link: 'https://github.com/Halcon5462/ExAmigo',
     frozen: true
