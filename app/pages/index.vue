@@ -324,7 +324,7 @@ const projects = [
   {
     title: 'lukidown_bot',
     domain: 'Bot for downloads media',
-    description: 'This bot is designed to download various media from platforms such as YouTube / TikTok / Instagram / Pinterest / Rutube / VK / Spotify / Shazam / Yandex Music / SoundCloud / VK Music / Deezer / Apple Music / Tenor / JioSaavn / Twitch(Only clips) / Snapchat / Reddit.',
+    description: 'This bot is designed to download various media from platforms such as YouTube / TikTok / Instagram / Pinterest / Rutube / VK / Spotify / Shazam / Yandex Music / SoundCloud / VK Music / Deezer / Apple Music / Tenor / JioSaavn / Twitch(Only clips) / Snapchat / Reddit / Kinopoisk.',
     tags: [
       { name: 'Python', icon: 'mdi:language-python' },
       { name: 'PostgreSQL', icon: 'bxl:postgresql' },
@@ -333,8 +333,8 @@ const projects = [
       { name: 'Docker', icon: 'bxl:docker' },
     ],
     year: '2026-ATM',
-    image: '/lukidown.png?ver=leto',
-    link: 'https://t.me/lukidown_bot',
+    image: '/lukidown.png?ver=general',
+    link: 'https://github.com/TheNightlyGod/lukidown_bot',
     active: true
   },
   {
