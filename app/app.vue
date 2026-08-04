@@ -50,6 +50,67 @@ const randomReferral = referrals[Math.floor(Math.random() * referrals.length)]
 </script>
 
 <style>
+:root {
+  color-scheme: light dark;
+  --app-bg-color: #c5c5c5;
+  --app-bg-image: url("/back.png?ver=leto");
+  --text-primary: #0d0d0d;
+  --text-secondary: rgba(0, 0, 0, 0.7);
+  --text-muted: rgba(0, 0, 0, 0.5);
+  --glass-bg: rgba(255, 255, 255, 0.45);
+  --glass-bg-hover: rgba(255, 255, 255, 0.65);
+  --glass-border: rgba(0, 0, 0, 0.12);
+  --glass-border-hover: rgba(0, 0, 0, 0.25);
+  --glass-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+  --btn-active-bg: #0d0d0d;
+  --btn-active-color: #ffffff;
+  --btn-active-border: #0d0d0d;
+  --mouse-border: #0d0d0d;
+  --mouse-wheel: #0d0d0d;
+  --card-bg: rgba(255, 255, 255, 0.45);
+  --card-bg-hover: rgba(255, 255, 255, 0.65);
+  --card-shadow-hover: 0 12px 30px rgba(0, 0, 0, 0.12);
+  --card-shine: radial-gradient(200px 100px at var(--shineX) var(--shineY), rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.15), transparent 50%);
+  --tag-bg: rgba(0, 0, 0, 0.08);
+  --tag-color: rgba(0, 0, 0, 0.85);
+  --badge-year-bg: rgba(0, 0, 0, 0.08);
+  --badge-year-color: rgba(0, 0, 0, 0.65);
+  --social-icon-color: #0d0d0d;
+  --mini-player-empty-cover: #d1d5db;
+  --placeholder-bg: linear-gradient(135deg, #e5e7eb, #d1d5db);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --app-bg-color: #000000;
+    --app-bg-image: url("/backb.png?ver=leto");
+    --text-primary: #ffffff;
+    --text-secondary: rgba(255, 255, 255, 0.75);
+    --text-muted: rgba(255, 255, 255, 0.55);
+    --glass-bg: rgba(0, 0, 0, 0.28);
+    --glass-bg-hover: rgba(255, 255, 255, 0.16);
+    --glass-border: rgba(255, 255, 255, 0.14);
+    --glass-border-hover: rgba(255, 255, 255, 0.25);
+    --glass-shadow: 0 4px 14px rgba(255, 255, 255, 0.18);
+    --btn-active-bg: #ffffff;
+    --btn-active-color: #111111;
+    --btn-active-border: #ffffff;
+    --mouse-border: #ffffff;
+    --mouse-wheel: #ffffff;
+    --card-bg: rgba(0, 0, 0, 0.28);
+    --card-bg-hover: rgba(255, 255, 255, 0.08);
+    --card-shadow-hover: 0 12px 30px rgba(0, 0, 0, 0.3);
+    --card-shine: radial-gradient(200px 100px at var(--shineX) var(--shineY), rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.02), transparent 50%);
+    --tag-bg: rgba(255, 255, 255, 0.08);
+    --tag-color: rgba(255, 255, 255, 0.85);
+    --badge-year-bg: rgba(255, 255, 255, 0.08);
+    --badge-year-color: rgba(255, 255, 255, 0.6);
+    --social-icon-color: #ffffff;
+    --mini-player-empty-cover: #222222;
+    --placeholder-bg: linear-gradient(135deg, #333333, #444444);
+  }
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -68,6 +129,9 @@ html, body {
   -ms-overflow-style: none;
   scrollbar-width: none;
   font-family: 'Comfortaa', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  background-color: var(--app-bg-color);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 html::-webkit-scrollbar,
 body::-webkit-scrollbar {
@@ -84,9 +148,10 @@ body::-webkit-scrollbar {
 
 <style scoped>
 .app {
-  background: url("/back.png?ver=leto") center top / cover no-repeat fixed;
+  background: var(--app-bg-color) var(--app-bg-image) center top / cover no-repeat fixed;
   min-height: 100vh;
   width: 100%;
+  transition: background-color 0.3s ease;
 }
 
 .header {
@@ -139,13 +204,13 @@ body::-webkit-scrollbar {
   justify-content: center;
   width: 48px;
   height: 48px;
-  color: #000000;
+  color: var(--social-icon-color);
   text-decoration: none;
-  background: rgba(0, 0, 0, 0.28);
+  background: var(--glass-bg);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   transition: all 0.22s ease;
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  border: 1px solid var(--glass-border);
   border-radius: 9999px;
 }
 
@@ -157,9 +222,10 @@ body::-webkit-scrollbar {
 }
 
 .social-btn:hover {
-  background: rgba(255, 255, 255, 0.16);
+  background: var(--glass-bg-hover);
   transform: translateY(-2px) scale(1.05);
-  box-shadow: 0 4px 14px rgba(255, 255, 255, 0.18);
+  box-shadow: var(--glass-shadow);
+  border-color: var(--glass-border-hover);
 }
 
 .social-btn:active {
@@ -169,6 +235,7 @@ body::-webkit-scrollbar {
 .social-btn svg {
   width: 22px;
   height: 22px;
+  fill: currentColor;
   transition: transform 0.3s ease;
 }
 

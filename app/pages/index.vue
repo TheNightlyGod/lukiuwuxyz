@@ -1,12 +1,50 @@
 <template>
   <div class="page-viewport" :class="{ 'scrolled': isScrolled }">
-    <div class="scroll-content">
+    <div class="scroll-content" :style="{ transform: `translateY(-${activeSection * 100}vh)` }">
       <section class="section-profile">
         <div class="profile-content">
           <div class="profile-header">
             <img src="/3d.png?ver=leto" alt="Avatar" class="profile-avatar" />
             <h1 class="profile-title">TheNightlyGod</h1>
+
+            <button class="expand-profile-btn" @click="isAboutExpanded = !isAboutExpanded" :aria-expanded="isAboutExpanded">
+              <span>Expand</span>
+              <svg class="expand-arrow" :class="{ rotated: isAboutExpanded }" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M6 9l6 6 6-6" />
+              </svg>
+            </button>
           </div>
+
+          <transition name="expand-card">
+            <div v-if="isAboutExpanded" class="about-card">
+              <div class="about-card-section">
+                <h3 class="about-card-subtitle">About Me</h3>
+                <div class="about-card-text">
+                  <p>My name is Daniil, or Luki, or TheNightlyGod.</p>
+                  <p>I’m a 17-year-old guy who does programming.</p>
+                  <p>I might be underestimating my abilities, but I consider myself an intermediate developer.</p>
+                  <p>I’ve been interested in technology and system administration since I was 6 years old.</p>
+                  <p>I’m a fuckstack(This typo was included on purpose...) developer as well as a 3D artist.</p>
+                  <p>I’m a music lover, so don’t be surprised by the music you see here or on my Telegram channel.</p>
+                  <p>I own a Meta Quest 3, but I don’t use VR very often.</p>
+                </div>
+              </div>
+
+              <div class="about-card-section">
+                <h3 class="about-card-subtitle">Skillset</h3>
+                <div class="skillset-tags">
+                  <span class="project-tag"><Icon name="mdi:language-python" class="project-tag-icon" /> Python</span>
+                  <span class="project-tag"><Icon name="teenyicons:c-sharp-solid" class="project-tag-icon" /> C#</span>
+                  <span class="project-tag"><Icon name="simple-icons:typescript" class="project-tag-icon" /> TypeScript</span>
+                  <span class="project-tag"><Icon name="simple-icons:vuedotjs" class="project-tag-icon" /> Vue.js</span>
+                  <span class="project-tag"><Icon name="simple-icons:nuxtdotjs" class="project-tag-icon" /> Nuxt</span>
+                  <span class="project-tag"><Icon name="simple-icons:nodedotjs" class="project-tag-icon" /> Node.js</span>
+                  <span class="project-tag"><Icon name="simple-icons:docker" class="project-tag-icon" /> Docker</span>
+                  <span class="project-tag"><Icon name="simple-icons:git" class="project-tag-icon" /> Git</span>
+                </div>
+              </div>
+            </div>
+          </transition>
 
           <div class="profile-socials">
             <a href="https://github.com/TheNightlyGod" target="_blank" class="social-btn-centered" aria-label="GitHub">
@@ -143,12 +181,90 @@
           </div>
         </div>
       </section>
+
+      <section class="section-badges" @wheel="handleBadgesWheel">
+        <div class="badges-content">
+          <div class="badges-header-row">
+            <button class="back-projects-btn" @click="backToProjects">
+              <svg class="up-arrow-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M18 15l-6-6-6 6" />
+              </svg>
+              Click to back to projects
+            </button>
+          </div>
+
+          <div class="otoring-panel">
+            <a :href="prevHref" target="_blank" class="otoring-btn otoring-prev" aria-label="Previous site">
+              <img v-if="otoringData?.prev?.favicon" :src="otoringData.prev.favicon" alt="" class="otoring-favicon" />
+              <span class="otoring-btn-text">{{ prevLabel }}</span>
+            </a>
+
+            <a href="https://webring.otomir23.me/" target="_blank" class="otoring-center-logo" aria-label="otoring webring">
+              <span class="otoring-title">otoring</span>
+              <span class="otoring-sub">webring</span>
+            </a>
+
+            <a :href="nextHref" target="_blank" class="otoring-btn otoring-next" aria-label="Next site">
+              <span class="otoring-btn-text">{{ nextLabel }}</span>
+              <img v-if="otoringData?.next?.favicon" :src="otoringData.next.favicon" alt="" class="otoring-favicon" />
+            </a>
+          </div>
+
+          <div class="badges-panel">
+            <div v-if="badges.length > 0" class="badges-flex">
+              <template v-for="(b, i) in badges" :key="i">
+                <a
+                    v-if="b.link"
+                    :href="b.link"
+                    target="_blank"
+                    class="badge-item"
+                    :title="b.title || '88x31 badge'"
+                >
+                  <img :src="b.src" width="88" height="31" :alt="b.title || 'badge'" class="badge-88x31-img" />
+                </a>
+                <span
+                    v-else
+                    class="badge-item badge-item-static"
+                    :title="b.title || '88x31 badge'"
+                >
+                  <img :src="b.src" width="88" height="31" :alt="b.title || 'badge'" class="badge-88x31-img" />
+                </span>
+              </template>
+            </div>
+            <div v-else class="badges-empty-placeholder">
+              <span>88x31 Badges Panel</span>
+            </div>
+          </div>
+
+          <div class="our-badge-panel">
+            <span class="our-badge-title">Our Badge</span>
+            <a href="https://lukiuwu.xyz" target="_blank" class="badge-item" title="lukioff">
+              <img src="/badges/lukioff.gif" width="88" height="31" alt="lukioff" class="badge-88x31-img" />
+            </a>
+            <button class="copy-badge-code-btn" @click="copyOurBadgeCode">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+              </svg>
+              Copy Code
+            </button>
+          </div>
+        </div>
+      </section>
     </div>
+
+    <transition name="toast-fade">
+      <div v-if="showToast" class="badge-toast">
+        {{ toastText }}
+      </div>
+    </transition>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, watch, nextTick, onMounted, onUnmounted } from 'vue'
+
+const isAboutExpanded = ref(false)
 
 const referrals = [
   { href: 'https://lukiuwu.xyz/p2g',  ico: '/iconp2g.ico' },
@@ -418,6 +534,84 @@ const filteredProjects = computed(() => {
   return list
 })
 
+interface OtoringSite {
+  id: number
+  slug: string
+  name: string
+  url: string
+  favicon?: string
+}
+
+interface OtoringData {
+  prev?: OtoringSite
+  curr?: OtoringSite
+  next?: OtoringSite
+}
+
+const otoringData = ref<OtoringData | null>(null)
+
+const prevLabel = computed(() => {
+  const name = otoringData.value?.prev?.name
+  return name ? `← ${name}` : '← Prev'
+})
+
+const prevHref = computed(() => {
+  return otoringData.value?.prev?.url || 'https://webring.otomir23.me/lukioff/prev'
+})
+
+const nextLabel = computed(() => {
+  const name = otoringData.value?.next?.name
+  return name ? `${name} →` : 'Next →'
+})
+
+const nextHref = computed(() => {
+  return otoringData.value?.next?.url || 'https://webring.otomir23.me/lukioff/next'
+})
+
+const fetchOtoringData = async () => {
+  try {
+    const res = await fetch('https://webring.otomir23.me/lukioff/data')
+    if (res.ok) {
+      const data: OtoringData = await res.json()
+      otoringData.value = data
+    }
+  } catch (err) {
+  }
+}
+
+interface BadgeItem {
+  src: string
+  link?: string
+  title?: string
+}
+
+const badges = ref<BadgeItem[]>([
+  { src: '/badges/any-browser-ru.png', title: 'Any Browser' },
+  { src: '/badges/js.png', title: 'JavaScript' },
+  { src: '/badges/webmoney.gif', title: 'WebMoney' },
+  { src: '/badges/telegram.gif', link: 'https://t.me/lukioff', title: 'Telegram' },
+  { src: '/badges/seedyourtorrents.gif', link: 'https://www.qbittorrent.org/', title: 'Seed Your Torrents' },
+  { src: '/badges/vrchat.png', link: 'https://vrchat.com/home/user/usr_75e93365-6b40-40f5-81b7-536bee948457', title: 'VRChat Profile' },
+])
+
+const toastText = ref('')
+const showToast = ref(false)
+let toastTimeout: ReturnType<typeof setTimeout> | null = null
+
+const copyOurBadgeCode = () => {
+  const code = `<a href="https://lukiuwu.xyz" target="_blank"><img src="https://lukiuwu.xyz/badges/lukioff.gif" alt="lukioff" width="88" height="31" /></a>`
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(code).then(() => {
+      toastText.value = 'Copied lukioff badge HTML code!'
+      showToast.value = true
+      if (toastTimeout) clearTimeout(toastTimeout)
+      toastTimeout = setTimeout(() => {
+        showToast.value = false
+      }, 2500)
+    })
+  }
+}
+
 type TiltVars = { rx: number; ry: number; shineX: number; shineY: number; scale: number }
 
 const MAX_TILT_DEG = 5
@@ -553,43 +747,90 @@ function resetTiltCard(e: PointerEvent) {
   setTarget(el, { ...DEFAULT_VARS })
 }
 
-const isScrolled = ref(false)
+const activeSection = ref(0)
+const isScrolled = computed(() => activeSection.value > 0)
 const observer = ref<IntersectionObserver | null>(null)
 let isAnimating = false
 
-const triggerReveal = () => {
-  if (isAnimating) return
+const goToSection = (index: number) => {
+  if (isAnimating || index < 0 || index > 2) return
   isAnimating = true
-  isScrolled.value = true
+  activeSection.value = index
+
+  if (index === 1) {
+    const scrollEl = document.querySelector('.section-projects')
+    if (scrollEl) scrollEl.scrollTop = 0
+  } else if (index === 2) {
+    const scrollEl = document.querySelector('.section-badges')
+    if (scrollEl) scrollEl.scrollTop = 0
+  }
+
   setTimeout(() => { isAnimating = false }, 800)
 }
 
-const hideProjects = () => {
-  if (isAnimating) return
-  isAnimating = true
-  isScrolled.value = false
-  const scrollEl = document.querySelector('.section-projects')
-  if (scrollEl) {
-    scrollEl.scrollTo({ top: 0 })
-  }
-  setTimeout(() => { isAnimating = false }, 800)
+const triggerReveal = () => {
+  goToSection(1)
 }
+
+const hideProjects = () => {
+  goToSection(0)
+}
+
+const backToProjects = () => {
+  goToSection(1)
+}
+
+let overscrollY = 0
+let overscrollTimer: ReturnType<typeof setTimeout> | null = null
+const WHEEL_OVERSCROLL_THRESHOLD = 300
 
 const handleProjectsWheel = (e: WheelEvent) => {
   if (isAnimating) return
   const el = e.currentTarget as HTMLElement
-  if (el && el.scrollTop === 0 && e.deltaY < 0) {
+  if (!el) return
+
+  const isAtTop = el.scrollTop <= 0
+  const isAtBottom = Math.ceil(el.scrollTop + el.clientHeight) >= el.scrollHeight - 5
+
+  if (isAtTop && e.deltaY < 0) {
     e.preventDefault()
-    hideProjects()
+    overscrollY = 0
+    goToSection(0)
+  } else if (isAtBottom && e.deltaY > 0) {
+    overscrollY += e.deltaY
+
+    if (overscrollTimer) clearTimeout(overscrollTimer)
+    overscrollTimer = setTimeout(() => {
+      overscrollY = 0
+    }, 450)
+
+    if (overscrollY >= WHEEL_OVERSCROLL_THRESHOLD) {
+      e.preventDefault()
+      overscrollY = 0
+      goToSection(2)
+    }
+  } else {
+    overscrollY = 0
+  }
+}
+
+const handleBadgesWheel = (e: WheelEvent) => {
+  if (isAnimating) return
+  const el = e.currentTarget as HTMLElement
+  if (!el) return
+
+  if (el.scrollTop <= 0 && e.deltaY < 0) {
+    e.preventDefault()
+    goToSection(1)
   }
 }
 
 const handleGlobalWheel = (e: WheelEvent) => {
   if (isAnimating) return
 
-  if (e.deltaY > 0 && !isScrolled.value) {
+  if (activeSection.value === 0 && e.deltaY > 0) {
     e.preventDefault()
-    triggerReveal()
+    goToSection(1)
   }
 }
 
@@ -598,23 +839,39 @@ const handleTouchStart = (e: TouchEvent) => {
   touchStartY = e.touches[0].clientY
 }
 
+const TOUCH_OVERSCROLL_THRESHOLD = 90
+
 const handleTouchMove = (e: TouchEvent) => {
   if (isAnimating) return
 
   const touchEndY = e.touches[0].clientY
   const diffY = touchStartY - touchEndY
 
-  if (!isScrolled.value && diffY > 15) {
-    triggerReveal()
-  } else if (isScrolled.value) {
+  if (activeSection.value === 0 && diffY > 30) {
+    goToSection(1)
+  } else if (activeSection.value === 1) {
     const scrollEl = document.querySelector('.section-projects')
-    if (scrollEl && scrollEl.scrollTop === 0 && diffY < -15) {
-      hideProjects()
+    if (scrollEl) {
+      const isAtTop = scrollEl.scrollTop <= 0
+      const isAtBottom = Math.ceil(scrollEl.scrollTop + scrollEl.clientHeight) >= scrollEl.scrollHeight - 5
+
+      if (isAtTop && diffY < -30) {
+        goToSection(0)
+      } else if (isAtBottom && diffY > TOUCH_OVERSCROLL_THRESHOLD) {
+        goToSection(2)
+      }
+    }
+  } else if (activeSection.value === 2) {
+    const scrollEl = document.querySelector('.section-badges')
+    if (scrollEl && scrollEl.scrollTop <= 0 && diffY < -30) {
+      goToSection(1)
     }
   }
 }
 
 onMounted(() => {
+  fetchOtoringData()
+
   window.addEventListener('wheel', handleGlobalWheel, { passive: false })
   window.addEventListener('touchstart', handleTouchStart, { passive: true })
   window.addEventListener('touchmove', handleTouchMove, { passive: false })
@@ -658,15 +915,11 @@ onUnmounted(() => {
 
 .scroll-content {
   width: 100%;
-  height: 200vh;
+  height: 300vh;
   display: flex;
   flex-direction: column;
   transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
   will-change: transform;
-}
-
-.scrolled .scroll-content {
-  transform: translateY(-100vh);
 }
 
 .section-profile {
@@ -694,14 +947,14 @@ onUnmounted(() => {
   flex-direction: column;
   align-items: center;
   gap: 0px;
-  margin-bottom: 32px;
+  margin-bottom: 16px;
   justify-content: center;
   width: 100%;
 }
 
 .profile-avatar {
-  width: 240px;
-  height: 240px;
+  width: 210px;
+  height: 210px;
   border-radius: 50%;
   object-fit: cover;
   flex-shrink: 0;
@@ -714,15 +967,124 @@ onUnmounted(() => {
   font-family: Comfortaa, serif;
   font-size: 34px;
   font-weight: 700;
-  color: #fff;
+  color: var(--text-primary);
   margin: 0;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
   line-height: 1.1;
   letter-spacing: -0.5px;
   text-align: center;
-  margin-top: -36px;
+  margin-top: -28px;
   position: relative;
   z-index: 2;
+}
+
+.expand-profile-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 14px;
+  padding: 6px 16px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 9999px;
+  color: var(--text-primary);
+  font-family: Comfortaa, serif;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: all 0.25s ease;
+  user-select: none;
+  position: relative;
+  z-index: 2;
+}
+
+.expand-profile-btn:hover {
+  background: var(--glass-bg-hover);
+  border-color: var(--glass-border-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--glass-shadow);
+}
+
+.expand-arrow {
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.expand-arrow.rotated {
+  transform: rotate(180deg);
+}
+
+.about-card {
+  width: 100%;
+  max-width: 440px;
+  margin-bottom: 24px;
+  padding: 20px;
+  background: var(--card-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  color: var(--text-primary);
+  text-align: left;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.about-card-section {
+  margin-bottom: 14px;
+}
+.about-card-section:last-child {
+  margin-bottom: 0;
+}
+
+.about-card-subtitle {
+  font-family: Comfortaa, serif;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  opacity: 0.9;
+}
+
+.about-card-text {
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.about-card-text p {
+  margin: 0;
+}
+
+.skillset-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.expand-card-enter-active,
+.expand-card-leave-active {
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  max-height: 600px;
+  opacity: 1;
+  overflow: hidden;
+}
+
+.expand-card-enter-from,
+.expand-card-leave-to {
+  max-height: 0;
+  opacity: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  margin-bottom: 0;
+  border-color: transparent;
+  transform: translateY(-8px);
 }
 
 .profile-socials {
@@ -738,10 +1100,10 @@ onUnmounted(() => {
   justify-content: center;
   width: 48px;
   height: 48px;
-  color: #fff;
+  color: var(--social-icon-color);
   text-decoration: none;
-  background: rgba(0, 0, 0, 0.28);
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
   border-radius: 50%;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
@@ -756,10 +1118,10 @@ onUnmounted(() => {
 }
 
 .social-btn-centered:hover {
-  background: rgba(255, 255, 255, 0.16);
+  background: var(--glass-bg-hover);
   transform: translateY(-2px) scale(1.05);
-  box-shadow: 0 6px 15px rgba(255, 255, 255, 0.15);
-  border-color: rgba(255, 255, 255, 0.25);
+  box-shadow: var(--glass-shadow);
+  border-color: var(--glass-border-hover);
 }
 
 .social-btn-centered:active {
@@ -780,8 +1142,8 @@ onUnmounted(() => {
   min-width: 0;
   max-width: 176px !important;
   width: 100% !important;
-  background: rgba(0, 0, 0, 0.28) !important;
-  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  background: var(--glass-bg) !important;
+  border: 1px solid var(--glass-border) !important;
   transition: all 0.22s ease !important;
 
   height: 50px !important;
@@ -820,9 +1182,9 @@ onUnmounted(() => {
 }
 
 .widgets-container :deep(.mini-weather:hover) {
-  background: rgba(255, 255, 255, 0.12) !important;
-  border-color: rgba(255, 255, 255, 0.2) !important;
-  box-shadow: 0 6px 15px rgba(255, 255, 255, 0.1) !important;
+  background: var(--glass-bg-hover) !important;
+  border-color: var(--glass-border-hover) !important;
+  box-shadow: var(--glass-shadow) !important;
   transform: translateY(-1px);
 }
 
@@ -842,7 +1204,7 @@ onUnmounted(() => {
 .mouse {
   width: 22px;
   height: 36px;
-  border: 2px solid #fff;
+  border: 2px solid var(--mouse-border);
   border-radius: 11px;
   position: relative;
 }
@@ -850,7 +1212,7 @@ onUnmounted(() => {
 .wheel {
   width: 4px;
   height: 8px;
-  background-color: #fff;
+  background-color: var(--mouse-wheel);
   border-radius: 2px;
   position: absolute;
   top: 6px;
@@ -862,7 +1224,7 @@ onUnmounted(() => {
 .scroll-text {
   font-family: Comfortaa, serif;
   font-size: 11px;
-  color: #fff;
+  color: var(--text-primary);
   letter-spacing: 1px;
   text-transform: uppercase;
 }
@@ -935,10 +1297,10 @@ onUnmounted(() => {
 
 .year-filter-btn {
   padding: 6px 16px;
-  background: rgba(0, 0, 0, 0.28);
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
   border-radius: 9999px;
-  color: rgba(255, 255, 255, 0.75);
+  color: var(--text-secondary);
   font-family: Comfortaa, serif;
   font-size: 12px;
   cursor: pointer;
@@ -948,15 +1310,15 @@ onUnmounted(() => {
 }
 
 .year-filter-btn:hover {
-  background: rgba(255, 255, 255, 0.16);
-  color: #fff;
-  border-color: rgba(255, 255, 255, 0.25);
+  background: var(--glass-bg-hover);
+  color: var(--text-primary);
+  border-color: var(--glass-border-hover);
 }
 
 .year-filter-btn.active {
-  background: #fff;
-  color: #111;
-  border-color: #fff;
+  background: var(--btn-active-bg);
+  color: var(--btn-active-color);
+  border-color: var(--btn-active-border);
   font-weight: 700;
 }
 
@@ -969,10 +1331,10 @@ onUnmounted(() => {
 
 .status-filter-btn {
   padding: 6px 16px;
-  background: rgba(0, 0, 0, 0.28);
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
   border-radius: 9999px;
-  color: rgba(255, 255, 255, 0.75);
+  color: var(--text-secondary);
   font-family: Comfortaa, serif;
   font-size: 12px;
   font-weight: 600;
@@ -983,9 +1345,9 @@ onUnmounted(() => {
 }
 
 .status-filter-btn:hover {
-  background: rgba(255, 255, 255, 0.16);
-  color: #fff;
-  border-color: rgba(255, 255, 255, 0.25);
+  background: var(--glass-bg-hover);
+  color: var(--text-primary);
+  border-color: var(--glass-border-hover);
 }
 
 .status-filter-btn.status-archived.active {
@@ -1011,10 +1373,10 @@ onUnmounted(() => {
   align-items: center;
   gap: 8px;
   padding: 8px 18px;
-  background: rgba(0, 0, 0, 0.28);
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
   border-radius: 9999px;
-  color: rgba(255, 255, 255, 0.85);
+  color: var(--text-secondary);
   font-family: Comfortaa, serif;
   font-size: 12px;
   cursor: pointer;
@@ -1024,11 +1386,11 @@ onUnmounted(() => {
 }
 
 .hide-projects-btn:hover {
-  background: rgba(255, 255, 255, 0.16);
-  color: #fff;
+  background: var(--glass-bg-hover);
+  color: var(--text-primary);
   transform: translateY(-2px);
-  box-shadow: 0 6px 15px rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.25);
+  box-shadow: var(--glass-shadow);
+  border-color: var(--glass-border-hover);
 }
 
 .hide-projects-btn:active {
@@ -1046,9 +1408,9 @@ onUnmounted(() => {
 .projects-title {
   font-family: Comfortaa, serif;
   font-size: 32px;
-  color: #fff;
+  color: var(--text-primary);
   margin: 0;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
 }
 
 .projects-grid {
@@ -1080,12 +1442,12 @@ onUnmounted(() => {
   flex-direction: column;
   justify-content: space-between;
   padding: 22px;
-  background: rgba(0, 0, 0, 0.28);
+  background: var(--card-bg);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  border: 1px solid var(--glass-border);
   border-radius: 16px;
-  color: white;
+  color: var(--text-primary);
   text-decoration: none;
   width: 100%;
   height: 100%;
@@ -1103,9 +1465,9 @@ onUnmounted(() => {
 }
 
 .project-card.is-hovering {
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
-  border-color: rgba(255, 255, 255, 0.25);
-  background: rgba(255, 255, 255, 0.08);
+  box-shadow: var(--card-shadow-hover);
+  border-color: var(--glass-border-hover);
+  background: var(--card-bg-hover);
 }
 
 .project-card.is-hovering .card-shine {
@@ -1120,12 +1482,7 @@ onUnmounted(() => {
   opacity: 0;
   transition: opacity 0.3s ease;
   z-index: 1;
-  background: radial-gradient(
-      200px 100px at var(--shineX) var(--shineY),
-      rgba(255, 255, 255, 0.12),
-      rgba(255, 255, 255, 0.02),
-      transparent 50%
-  );
+  background: var(--card-shine);
 }
 
 .project-card-top {
@@ -1144,7 +1501,7 @@ onUnmounted(() => {
   height: 36px;
   border-radius: 50%;
   object-fit: cover;
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--tag-bg);
   flex-shrink: 0;
 }
 
@@ -1156,7 +1513,7 @@ onUnmounted(() => {
   font-family: Comfortaa, serif;
   font-size: 16px;
   font-weight: 700;
-  color: #fff;
+  color: var(--text-primary);
   margin: 0;
   white-space: nowrap;
   overflow: hidden;
@@ -1165,7 +1522,7 @@ onUnmounted(() => {
 
 .project-card-domain {
   font-size: 11px;
-  color: rgba(255, 255, 255, 0.55);
+  color: var(--text-muted);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1174,7 +1531,7 @@ onUnmounted(() => {
 
 .project-card-desc {
   font-size: 12.5px;
-  color: rgba(255, 255, 255, 0.75);
+  color: var(--text-secondary);
   line-height: 1.5;
   margin: 0 0 16px 0;
 }
@@ -1199,10 +1556,10 @@ onUnmounted(() => {
   align-items: center;
   gap: 4px;
   font-size: 10px;
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--tag-bg);
   padding: 1px 6px;
   border-radius: 4px;
-  color: rgba(255, 255, 255, 0.85);
+  color: var(--tag-color);
   white-space: nowrap;
 }
 
@@ -1257,29 +1614,336 @@ onUnmounted(() => {
 
 .project-card-year {
   font-size: 11px;
-  color: rgba(255, 255, 255, 0.6);
-  background: rgba(255, 255, 255, 0.08);
+  color: var(--badge-year-color);
+  background: var(--badge-year-bg);
   padding: 2px 8px;
   border-radius: 6px;
 }
 
 .project-card-arrow {
   font-size: 18px;
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--text-muted);
   transition: transform 0.22s ease;
 }
 
 .project-card:hover .project-card-arrow {
   transform: translateX(4px);
-  color: #fff;
+  color: var(--text-primary);
 }
 
-@media (max-width: 480px) {
+.section-badges {
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+  width: 100%;
+  flex-shrink: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.section-badges::-webkit-scrollbar {
+  display: none;
+}
+
+.badges-content {
+  width: 100%;
+  max-width: 1000px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 20px;
+}
+
+.badges-header-row {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.back-projects-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 18px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 9999px;
+  color: var(--text-secondary);
+  font-family: Comfortaa, serif;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.22s ease;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.back-projects-btn:hover {
+  background: var(--glass-bg-hover);
+  color: var(--text-primary);
+  transform: translateY(-2px);
+  box-shadow: var(--glass-shadow);
+  border-color: var(--glass-border-hover);
+}
+
+.back-projects-btn:hover .up-arrow-icon {
+  transform: translateY(-2px);
+}
+
+.otoring-panel {
+  width: 100%;
+  max-width: 860px;
+  padding: 16px 24px;
+  margin-bottom: 20px;
+  background: var(--card-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.otoring-center-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  color: var(--text-primary);
+  transition: transform 0.25s ease, opacity 0.25s ease;
+  user-select: none;
+}
+
+.otoring-center-logo:hover {
+  transform: scale(1.06);
+}
+
+.otoring-title {
+  font-family: Comfortaa, serif;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  background: linear-gradient(135deg, #a855f7, #3b82f6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.otoring-sub {
+  font-size: 10px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-top: -2px;
+}
+
+.otoring-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 9999px;
+  color: var(--text-secondary);
+  font-family: Comfortaa, serif;
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.22s ease;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  white-space: nowrap;
+}
+
+.otoring-btn:hover {
+  background: var(--glass-bg-hover);
+  color: var(--text-primary);
+  border-color: var(--glass-border-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--glass-shadow);
+}
+
+.otoring-favicon {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.badges-panel {
+  width: 100%;
+  max-width: 860px;
+  padding: 24px;
+  background: var(--card-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+}
+
+.badges-flex {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  align-items: center;
+}
+
+.badge-item {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+  border-radius: 2px;
+}
+
+.badge-item:hover {
+  transform: scale(1.08);
+  z-index: 2;
+}
+
+.badge-item-static {
+  cursor: default;
+}
+
+.badge-88x31-img {
+  width: 88px;
+  height: 31px;
+  object-fit: contain;
+  image-rendering: pixelated;
+  display: block;
+}
+
+.badges-empty-placeholder {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 80px;
+  color: var(--text-muted);
+  font-family: Comfortaa, serif;
+  font-size: 13px;
+}
+
+.our-badge-panel {
+  width: 100%;
+  max-width: 860px;
+  margin-top: 20px;
+  padding: 18px 24px;
+  background: var(--card-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.our-badge-title {
+  font-family: Comfortaa, serif;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.copy-badge-code-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 9999px;
+  color: var(--text-primary);
+  font-family: Comfortaa, serif;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: all 0.22s ease;
+}
+
+.copy-badge-code-btn:hover {
+  background: var(--glass-bg-hover);
+  border-color: var(--glass-border-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--glass-shadow);
+}
+
+.badge-toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  color: var(--text-primary);
+  padding: 8px 18px;
+  border-radius: 9999px;
+  font-family: Comfortaa, serif;
+  font-size: 12px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--glass-shadow);
+  z-index: 2000;
+  pointer-events: none;
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+}
+
+.toast-fade-enter-active,
+.toast-fade-leave-active {
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.toast-fade-enter-from,
+.toast-fade-leave-to {
+  opacity: 0;
+  transform: translate(-50%, 15px);
+}
+
+@media (max-width: 520px) {
   .projects-title {
-    font-size: 28px;
+    font-size: 26px;
   }
 
   .project-card {
+    padding: 16px;
+  }
+
+  .otoring-panel {
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px;
+  }
+
+  .otoring-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .badges-panel {
+    padding: 16px;
+  }
+
+  .our-badge-panel {
     padding: 16px;
   }
 }

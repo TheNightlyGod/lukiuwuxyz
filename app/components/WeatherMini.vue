@@ -32,12 +32,12 @@ const { weather } = useWeather(600000)
   align-items: center;
   gap: 10px;
   padding: 6px 14px;
-  background: rgba(0, 0, 0, 0.28);
+  background: var(--glass-bg);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  border: 1px solid var(--glass-border);
   border-radius: 9999px;
-  color: white;
+  color: var(--text-primary);
   max-width: 240px;
   overflow: hidden;
   pointer-events: auto;
@@ -77,14 +77,14 @@ const { weather } = useWeather(600000)
 
 .feels {
   font-size: 11.5px;
-  color: rgba(255, 255, 255, 0.75);
+  color: var(--text-secondary);
   margin-left: 6px;
   font-weight: 500;
 }
 
 .desc {
   font-size: 11px;
-  color: rgba(255, 255, 255, 0.75);
+  color: var(--text-secondary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

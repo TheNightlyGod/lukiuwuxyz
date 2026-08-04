@@ -54,12 +54,12 @@ const { track, animatedProgress } = useSpotifyNowPlaying()
   align-items: center;
   gap: 10px;
   padding: 6px 14px;
-  background: rgba(0, 0, 0, 0.28);
+  background: var(--glass-bg);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  border: 1px solid var(--glass-border);
   border-radius: 9999px;
-  color: white;
+  color: var(--text-primary);
   text-decoration: none;
   transition: all 0.22s ease;
   max-width: 240px;
@@ -70,7 +70,7 @@ const { track, animatedProgress } = useSpotifyNowPlaying()
 }
 
 .mini-player:not(.empty):hover {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--glass-bg-hover);
   border-color: rgba(30, 215, 96, 0.35);
   transform: translateY(-1px);
   box-shadow: 0 4px 14px rgba(30, 215, 96, 0.18);
@@ -97,13 +97,13 @@ const { track, animatedProgress } = useSpotifyNowPlaying()
   border-radius: 6px;
   object-fit: cover;
   flex-shrink: 0;
-  background: #222;
+  background: var(--mini-player-empty-cover);
   position: relative;
   z-index: 1;
 }
 
 .placeholder {
-  background: linear-gradient(135deg, #333, #444);
+  background: var(--placeholder-bg);
 }
 
 .info {
@@ -124,7 +124,7 @@ const { track, animatedProgress } = useSpotifyNowPlaying()
 
 .artist {
   font-size: 11.5px;
-  color: rgba(255, 255, 255, 0.75);
+  color: var(--text-secondary);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
