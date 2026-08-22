@@ -1629,90 +1629,6 @@ onUnmounted(() => {
   transform: translateY(-2px);
 }
 
-.otoring-panel {
-  width: 100%;
-  max-width: 860px;
-  padding: 16px 24px;
-  margin-bottom: 20px;
-  background: var(--card-bg);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid var(--glass-border);
-  border-radius: 20px;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-}
-
-.otoring-center-logo {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-decoration: none;
-  color: var(--text-primary);
-  transition: transform 0.25s ease, opacity 0.25s ease;
-  user-select: none;
-}
-
-.otoring-center-logo:hover {
-  transform: scale(1.06);
-}
-
-.otoring-title {
-  font-family: Comfortaa, serif;
-  font-size: 18px;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-  background: linear-gradient(135deg, #a855f7, #3b82f6);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.otoring-sub {
-  font-size: 10px;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  margin-top: -2px;
-}
-
-.otoring-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
-  border-radius: 9999px;
-  color: var(--text-secondary);
-  font-family: Comfortaa, serif;
-  font-size: 12px;
-  font-weight: 600;
-  text-decoration: none;
-  transition: all 0.22s ease;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  white-space: nowrap;
-}
-
-.otoring-btn:hover {
-  background: var(--glass-bg-hover);
-  color: var(--text-primary);
-  border-color: var(--glass-border-hover);
-  transform: translateY(-2px);
-  box-shadow: var(--glass-shadow);
-}
-
-.otoring-favicon {
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  object-fit: cover;
-}
-
 .badges-panel {
   width: 100%;
   max-width: 860px;
@@ -1862,17 +1778,6 @@ onUnmounted(() => {
 
   .project-card {
     padding: 16px;
-  }
-
-  .otoring-panel {
-    flex-direction: column;
-    gap: 12px;
-    padding: 16px;
-  }
-
-  .otoring-btn {
-    width: 100%;
-    justify-content: center;
   }
 
   .badges-panel {
