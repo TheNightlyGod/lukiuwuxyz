@@ -517,17 +517,6 @@ const filteredProjects = computed(() => {
   return list
 })
 
-const fetchOtoringData = async () => {
-  try {
-    const res = await fetch('https://webring.otomir23.me/lukioff/data')
-    if (res.ok) {
-      const data: OtoringData = await res.json()
-      otoringData.value = data
-    }
-  } catch (err) {
-  }
-}
-
 interface BadgeItem {
   src: string
   link?: string
@@ -819,8 +808,6 @@ const handleTouchMove = (e: TouchEvent) => {
 }
 
 onMounted(() => {
-  fetchOtoringData()
-
   window.addEventListener('wheel', handleGlobalWheel, { passive: false })
   window.addEventListener('touchstart', handleTouchStart, { passive: true })
   window.addEventListener('touchmove', handleTouchMove, { passive: false })
