@@ -193,23 +193,6 @@
             </button>
           </div>
 
-          <div class="otoring-panel">
-            <a :href="prevHref" target="_blank" class="otoring-btn otoring-prev" aria-label="Previous site">
-              <img v-if="otoringData?.prev?.favicon" :src="otoringData.prev.favicon" alt="" class="otoring-favicon" />
-              <span class="otoring-btn-text">{{ prevLabel }}</span>
-            </a>
-
-            <a href="https://webring.otomir23.me/" target="_blank" class="otoring-center-logo" aria-label="otoring webring">
-              <span class="otoring-title">otoring</span>
-              <span class="otoring-sub">webring</span>
-            </a>
-
-            <a :href="nextHref" target="_blank" class="otoring-btn otoring-next" aria-label="Next site">
-              <span class="otoring-btn-text">{{ nextLabel }}</span>
-              <img v-if="otoringData?.next?.favicon" :src="otoringData.next.favicon" alt="" class="otoring-favicon" />
-            </a>
-          </div>
-
           <div class="badges-panel">
             <div v-if="badges.length > 0" class="badges-flex">
               <template v-for="(b, i) in badges" :key="i">
@@ -532,40 +515,6 @@ const filteredProjects = computed(() => {
   }
 
   return list
-})
-
-interface OtoringSite {
-  id: number
-  slug: string
-  name: string
-  url: string
-  favicon?: string
-}
-
-interface OtoringData {
-  prev?: OtoringSite
-  curr?: OtoringSite
-  next?: OtoringSite
-}
-
-const otoringData = ref<OtoringData | null>(null)
-
-const prevLabel = computed(() => {
-  const name = otoringData.value?.prev?.name
-  return name ? `← ${name}` : '← Prev'
-})
-
-const prevHref = computed(() => {
-  return otoringData.value?.prev?.url || 'https://webring.otomir23.me/lukioff/prev'
-})
-
-const nextLabel = computed(() => {
-  const name = otoringData.value?.next?.name
-  return name ? `${name} →` : 'Next →'
-})
-
-const nextHref = computed(() => {
-  return otoringData.value?.next?.url || 'https://webring.otomir23.me/lukioff/next'
 })
 
 const fetchOtoringData = async () => {
