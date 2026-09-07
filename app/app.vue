@@ -3,7 +3,7 @@
     <header class="header" v-if="$route.path !== '/'">
       <div class="left-side">
         <a href="/" class="logo" aria-label="Home">
-          <img src="/3d.png?ver=leto" alt="Logo" />
+          <img src="/3d.png?ver=oceni" alt="Logo" />
         </a>
 
         <div class="widgets-column">
@@ -53,7 +53,7 @@ const randomReferral = referrals[Math.floor(Math.random() * referrals.length)]
 :root {
   color-scheme: light dark;
   --app-bg-color: #c5c5c5;
-  --app-bg-image: url("/back.png?ver=leto");
+  --app-bg-image: url("/back.png?ver=oceni");
   --text-primary: #0d0d0d;
   --text-secondary: rgba(0, 0, 0, 0.7);
   --text-muted: rgba(0, 0, 0, 0.5);
@@ -83,7 +83,7 @@ const randomReferral = referrals[Math.floor(Math.random() * referrals.length)]
 @media (prefers-color-scheme: dark) {
   :root {
     --app-bg-color: #000000;
-    --app-bg-image: url("/backb.png?ver=leto");
+    --app-bg-image: url("/backb.png?ver=oceni");
     --text-primary: #ffffff;
     --text-secondary: rgba(255, 255, 255, 0.75);
     --text-muted: rgba(255, 255, 255, 0.55);

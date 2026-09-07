@@ -4,7 +4,7 @@
       <section class="section-profile">
         <div class="profile-content">
           <div class="profile-header">
-            <img src="/3d.png?ver=leto" alt="Avatar" class="profile-avatar" />
+            <img src="/3d.png?ver=oceni" alt="Avatar" class="profile-avatar" />
             <h1 class="profile-title">TheNightlyGod</h1>
 
             <button class="expand-profile-btn" @click="isAboutExpanded = !isAboutExpanded" :aria-expanded="isAboutExpanded">
@@ -306,7 +306,7 @@ const projects = [
       { name: 'Docker', icon: 'bxl:docker' },
     ],
     year: '2025-ATM',
-    image: '/lukiuwu_bot.png?ver=leto',
+    image: '/lukiuwu_bot.png?ver=oceni',
     link: 'https://t.me/lukiuwu_bot',
     active: true
   },
@@ -334,7 +334,7 @@ const projects = [
       { name: 'Docker', icon: 'bxl:docker' },
     ],
     year: '2025-ATM',
-    image: '/3d.png?ver=leto',
+    image: '/3d.png?ver=oceni',
     link: 'https://github.com/TheNightlyGod/lukiuwuxyz',
     active: true
   },
