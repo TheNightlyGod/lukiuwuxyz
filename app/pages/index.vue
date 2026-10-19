@@ -451,6 +451,33 @@ const projects = [
     frozen: true
   },
   {
+    title: 'WallpaperMachine-intel',
+    domain: 'Fork of WallpaperMachine',
+    description: 'Wallpaper Engine wallpapers on your Mac. A free, open-source app that plays scene, video and web wallpapers from the Steam Workshop. Intel Mac (x86_64), macOS 15+.',
+    tags: [
+      { name: 'Swift', icon: 'mdi:language-swift' },
+      { name: 'Rust', icon: 'mdi:language-rust' },
+    ],
+    year: '2026',
+    image: 'https://github.com/TheNightlyGod/WallpaperMachine-intel/blob/main/App/Resources/Assets.xcassets/AppIconDay.imageset/day.png?raw=true',
+    link: 'https://github.com/TheNightlyGod/WallpaperMachine-intel',
+    active: true
+  },
+  {
+    title: 'Attesor',
+    domain: 'Apple Silicon (ARM64) Compatibility Layer for Intel Mac & Hackintosh.',
+    description: 'Attesor is a high-performance userland translation layer ("Reverse Rosetta 2") for macOS. it loads the genuine Apple Silicon userland (dyld and the dyld_shared_cache_arm64e system cache), executes ARM64 machine code via a hybrid JIT compiler with ahead-of-time (AOT) caching, translates Mach traps and BSD system calls into the host Intel kernel, and redirects Metal graphics API calls directly to the host\'s physical GPU.',
+    tags: [
+      { name: 'C', icon: 'mdi:language-c' },
+      { name: 'Rust', icon: 'mdi:language-rust' },
+      { name: 'Swift', icon: 'mdi:language-swift' },
+    ],
+    year: '2026',
+    image: 'https://github.com/TheNightlyGod/Attesor/blob/main/manager/attesor-icon.png?raw=true',
+    link: 'https://github.com/TheNightlyGod/Attesor',
+    active: true
+  },
+  {
     title: 'botikboot',
     domain: 'Bot for Twitch',
     description: 'This bot is currently under development. Its launch will be announced on the Telegram channel.',
