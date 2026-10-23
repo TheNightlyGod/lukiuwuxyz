@@ -359,7 +359,7 @@ const projects = [
       { name: 'Avalonia', icon: 'simple-icons:avaloniaui' },
     ],
     year: '2025-2026',
-    image: 'https://github.com/MultiSavesBackupTool/MSBT/blob/master/msbt_logo.png?raw=true',
+    image: 'https://raw.githubusercontent.com/MultiSavesBackupTool/MSBT/refs/heads/master/msbt_logo.png',
     link: 'https://github.com/MultiSavesBackupTool/MSBT',
     frozen: true
   },
@@ -413,10 +413,9 @@ const projects = [
       { name: 'PostgreSQL', icon: 'bxl:postgresql' },
       { name: 'FastAPI', icon: 'bxl:fastapi' },
       { name: 'Docker', icon: 'bxl:docker' },
-      { name: 'Yandex Cloud', icon: 'simple-icons:yandexcloud' },
     ],
     year: '2026-ATM',
-    image: '/luni.png?ver=leto',
+    image: '/luni.jpg?ver=general',
     link: 'https://t.me/lunioff_bot',
     active: true
   },
@@ -459,7 +458,7 @@ const projects = [
       { name: 'Rust', icon: 'mdi:language-rust' },
     ],
     year: '2026',
-    image: 'https://github.com/TheNightlyGod/WallpaperMachine-intel/blob/main/App/Resources/Assets.xcassets/AppIconDay.imageset/day.png?raw=true',
+    image: 'https://raw.githubusercontent.com/TheNightlyGod/WallpaperMachine-intel/refs/heads/main/App/Resources/Assets.xcassets/AppIconDay.imageset/day.png',
     link: 'https://github.com/TheNightlyGod/WallpaperMachine-intel',
     active: true
   },
@@ -473,8 +472,35 @@ const projects = [
       { name: 'Swift', icon: 'mdi:language-swift' },
     ],
     year: '2026',
-    image: 'https://github.com/TheNightlyGod/Attesor/blob/main/manager/attesor-icon.png?raw=true',
+    image: 'https://raw.githubusercontent.com/TheNightlyGod/Attesor/refs/heads/main/manager/attesor-icon.png',
     link: 'https://github.com/TheNightlyGod/Attesor',
+    active: true
+  },
+  {
+    title: 'WebStream-VR',
+    domain: 'WebStream-VR',
+    description: 'Stream what you see in Meta Quest to a browser over a local network. The app is installed on the headset, launches Meta’s system casting feature, receives the stream itself, and serves up a viewing page. You can open this page from a phone, PC, or TV on the same Wi-Fi network. A PC, ADB, or root access are not required for normal operation.',
+    tags: [
+      { name: 'Kotlin', icon: 'mdi:language-kotlin' },
+      { name: 'JavaScript', icon: 'mdi:language-javascript' },
+    ],
+    year: '2026',
+    image: 'https://raw.githubusercontent.com/TheNightlyGod/WebStream-VR/refs/heads/main/app/src/main/assets/web/android-chrome-192x192.png',
+    link: 'https://github.com/TheNightlyGod/WebStream-VR',
+    active: true
+  },
+  {
+    title: 'Shizuku-quest',
+    domain: 'Shizuku but for Quest',
+    description: 'Shizuku is a utility that allows normal applications to use system APIs directly with elevated permissions (root or ADB / Wireless ADB). This custom build includes enhanced Wireless ADB pairing, direct on-screen code entry, and VR / headset (e.g., Meta Quest) optimization.',
+    tags: [
+      { name: 'Kotlin', icon: 'mdi:language-kotlin' },
+      { name: 'Java', icon: 'mdi:language-java' },
+      { name: 'C++', icon: 'mdi:language-cpp' },
+    ],
+    year: '2026',
+    image: 'https://raw.githubusercontent.com/TheNightlyGod/Shizuku-quest/refs/heads/master/manager/src/main/res/mipmap-xxhdpi/ic_launcher.png',
+    link: 'https://github.com/TheNightlyGod/Shizuku-quest',
     active: true
   },
   {
